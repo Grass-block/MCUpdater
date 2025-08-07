@@ -5,8 +5,10 @@ import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.atcraftmc.updater.FilePath;
-import org.atcraftmc.updater.cdn.CDNClient;
-import org.atcraftmc.updater.protocol.packet.*;
+import org.atcraftmc.updater.network.CDNClient;
+import org.atcraftmc.updater.network.packet.P50_CDNCheckObjectStatus;
+import org.atcraftmc.updater.network.packet.P54_CDNFileChangeAttempt;
+import org.atcraftmc.updater.network.packet.P55_CDNFileChangeReady;
 import org.atcraftmc.updater.server.MCUpdaterServer;
 
 import java.io.File;
@@ -64,7 +66,7 @@ public final class CDNService extends Service {
         var request = new P50_CDNCheckObjectStatus(UUID.randomUUID().toString(), this.repository, file, this.token);
 
         try {
-            return this.client.sendQuery(request, P51_CDNObjectState.class).get().getChecksum();
+            return this.client.sendQuery(request, org.atcraftmc.updater.network.packet.P51_CDNObjectState.class).get().getChecksum();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -110,7 +112,7 @@ public final class CDNService extends Service {
                 new Thread(() -> {
                     for (var f : r.getTargets()) {
                         var file = new File(FilePath.runtime() + "/packs/" + f + ".zip");
-                        P52_CDNUploadObject.read(file, repository, token, (p)->{
+                        org.atcraftmc.updater.network.packet.P52_CDNUploadObject.read(file, repository, token, (p)->{
                             try {
                                 ctx.writeAndFlush(p).get();
                             } catch (InterruptedException | ExecutionException e) {

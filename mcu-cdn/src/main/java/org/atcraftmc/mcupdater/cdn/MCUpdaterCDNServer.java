@@ -10,9 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcraftmc.mcupdater.cdn.handler.CDNClientSideHandler;
 import org.atcraftmc.mcupdater.cdn.handler.CDNServerSideHandler;
-import org.atcraftmc.updater.protocol.ErrorCatchHandler;
-import org.atcraftmc.updater.protocol.HeartBeatHandler;
-import org.atcraftmc.updater.protocol.MCUProtocol;
+import org.atcraftmc.updater.network.handler.ErrorCatchHandler;
+import org.atcraftmc.updater.network.handler.HeartBeatHandler;
+import org.atcraftmc.updater.network.MCUProtocol;
 
 import java.io.File;
 import java.io.FileInputStream;

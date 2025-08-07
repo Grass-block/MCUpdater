@@ -96,6 +96,10 @@ public interface ClientBootstrap {
         }
 
         public void init() {
+            if (!SystemTray.isSupported()) {
+                return;
+            }
+
             this.systemTray = SystemTray.getSystemTray();
             this.icon = new TrayIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB), "Updater", new PopupMenu());
 
@@ -107,6 +111,10 @@ public interface ClientBootstrap {
         }
 
         public void dispose() {
+            if (!SystemTray.isSupported()) {
+                return;
+            }
+
             this.systemTray.remove(this.icon);
         }
 

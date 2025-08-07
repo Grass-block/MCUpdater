@@ -6,7 +6,7 @@ import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.atcraftmc.mcupdater.cdn.CDNFileManager;
 import org.atcraftmc.mcupdater.cdn.FileLockManager;
 import org.atcraftmc.mcupdater.cdn.MCUpdaterCDNServer;
-import org.atcraftmc.updater.protocol.packet.*;
+import org.atcraftmc.updater.network.packet.*;
 
 import java.io.File;
 import java.io.RandomAccessFile;

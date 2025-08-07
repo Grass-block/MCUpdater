@@ -5,7 +5,7 @@ import org.atcraftmc.updater.client.ClientBootstrap;
 import org.atcraftmc.updater.client.ui.framework.UI;
 import org.atcraftmc.updater.client.ui.framework.UIHandle;
 import org.atcraftmc.updater.client.ui.component.ImagePanel;
-import org.atcraftmc.updater.command.UpdateOperationListener;
+import org.atcraftmc.updater.UpdateOperationListener;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

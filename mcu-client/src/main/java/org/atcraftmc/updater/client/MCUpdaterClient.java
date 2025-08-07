@@ -1,13 +1,13 @@
 package org.atcraftmc.updater.client;
 
-import org.atcraftmc.updater.client.handler.VersionChannelRequestHandler;
+import org.atcraftmc.updater.client.network.VersionChannelRequestHandler;
 import org.atcraftmc.updater.client.ui.ConfiguratorUI;
 import org.atcraftmc.updater.client.ui.ErrorUI;
 import org.atcraftmc.updater.client.ui.MainWindowUI;
 import org.atcraftmc.updater.client.ui.UpdateViewingUI;
 import org.atcraftmc.updater.client.ui.framework.UIHandle;
 import org.atcraftmc.updater.client.util.Log;
-import org.atcraftmc.updater.protocol.packet.P10_VersionInfo;
+import org.atcraftmc.updater.network.packet.P10_VersionInfo;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -22,7 +22,7 @@ public final class MCUpdaterClient {
     final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final BlockingQueue<Object> lock = new ArrayBlockingQueue<>(1);
     private final ClientInstallationInfo info = new ClientInstallationInfo();
-    private final NetworkController networkController;
+    private final ClientNetworkService networkController;
     private UIHandle<MainWindowUI> mainWindowUI;
     private boolean completeView = false;
 
@@ -31,7 +31,7 @@ public final class MCUpdaterClient {
         var addr = address[0];
         var port = Integer.parseInt(address[1]);
 
-        this.networkController = new NetworkController(addr, port);
+        this.networkController = new ClientNetworkService(addr, port);
     }
 
     private void requestUpdate() {

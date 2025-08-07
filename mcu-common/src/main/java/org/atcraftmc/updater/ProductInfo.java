@@ -1,7 +1,7 @@
 package org.atcraftmc.updater;
 
 public interface ProductInfo {
-    String VERSION = "2.0.12";
+    String VERSION = "2.0.32";
 
     static String logo(String artifact, String version) {
         return """

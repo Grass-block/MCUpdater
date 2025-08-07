@@ -4,7 +4,6 @@ import me.gb2022.commons.math.SHA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcraftmc.updater.FilePath;
-import org.atcraftmc.updater.data.FileModifyStatus;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;

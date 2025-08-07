@@ -1,6 +1,6 @@
 package org.atcraftmc.updater.client.ui;
 
-import org.atcraftmc.updater.channel.UpdateChannelMeta;
+import org.atcraftmc.updater.data.UpdateChannelMeta;
 import org.atcraftmc.updater.client.ClientInstallationInfo;
 
 import javax.swing.*;

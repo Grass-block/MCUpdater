@@ -1,6 +1,6 @@
 package org.atcraftmc.updater.client.ui;
 
-import org.atcraftmc.updater.protocol.packet.P10_VersionInfo;
+import org.atcraftmc.updater.network.packet.P10_VersionInfo;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;

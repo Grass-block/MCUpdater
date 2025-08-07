@@ -9,8 +9,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import org.atcraftmc.updater.protocol.MCUProtocol;
-import org.atcraftmc.updater.protocol.packet.*;
+import org.atcraftmc.updater.network.MCUProtocol;
+import org.atcraftmc.updater.network.packet.*;
 import org.atcraftmc.updater.server.MCUpdaterServer;
 import org.atcraftmc.updater.server.file.FileSource;
 
@@ -23,7 +23,7 @@ import static org.atcraftmc.updater.server.MCUpdaterServer.LOGGER;
 public final class NetworkService extends Service {
     private final NioEventLoopGroup bossGroup = new NioEventLoopGroup();
     private final NioEventLoopGroup workerGroup = new NioEventLoopGroup();
-    private final Map<String, P10_VersionInfo> waitingList = new ConcurrentHashMap<>();
+    private final Map<String, org.atcraftmc.updater.network.packet.P10_VersionInfo> waitingList = new ConcurrentHashMap<>();
 
     public NetworkService(MCUpdaterServer server) {
         super(server);
@@ -70,7 +70,7 @@ public final class NetworkService extends Service {
         this.workerGroup.shutdownGracefully();
     }
 
-    public void addCDNWaitingList(String id, P10_VersionInfo p10VersionInfo) {
+    public void addCDNWaitingList(String id, org.atcraftmc.updater.network.packet.P10_VersionInfo p10VersionInfo) {
         this.waitingList.put(id, p10VersionInfo);
     }
 
@@ -91,7 +91,7 @@ public final class NetworkService extends Service {
 
             if (packet instanceof P20_VersionLogRequest p) {
                 LOGGER.info("received client version log request: {}", ctx.channel().remoteAddress());
-                ctx.writeAndFlush(new org.atcraftmc.updater.protocol.packet.P21_VersionLogInfo(server().versionLog(p.getVersion())));
+                ctx.writeAndFlush(new P21_VersionLogInfo(server().versionLog(p.getVersion())));
                 LOGGER.info("sent version log to client: {}", ctx.channel().remoteAddress());
                 return;
             }

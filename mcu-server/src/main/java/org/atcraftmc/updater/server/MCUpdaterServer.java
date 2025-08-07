@@ -5,10 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcraftmc.updater.FilePath;
 import org.atcraftmc.updater.PatchFile;
-import org.atcraftmc.updater.channel.VersionInfo;
-import org.atcraftmc.updater.data.FileModifyStatus;
-import org.atcraftmc.updater.data.diff.DiffCheck;
-import org.atcraftmc.updater.protocol.packet.*;
+import org.atcraftmc.updater.data.VersionInfo;
+import org.atcraftmc.updater.server.file.FileModifyStatus;
+import org.atcraftmc.updater.network.packet.*;
+import org.atcraftmc.updater.server.file.DiffCheck;
 import org.atcraftmc.updater.server.service.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -85,6 +85,8 @@ public final class MCUpdaterServer {
         this.cdn.stop();
     }
 
+
+    //actions
     public void buildVersion(String[] command) {
         if (command.length < 3) {
             LOGGER.error("正确用法: build <频道> <版本>");
@@ -119,6 +121,8 @@ public final class MCUpdaterServer {
 
         var update = new HashSet<String>();
         var remove = new HashSet<String>();
+
+        status.remove("");
 
         for (var path : status.keySet()) {
             var state = status.get(path);
@@ -197,6 +201,8 @@ public final class MCUpdaterServer {
         }
     }
 
+
+    //update
     private void sendAddFileResponse(ArrayList<pair> jobs, ChannelHandlerContext ctx) throws Exception {
         ctx.writeAndFlush(new P0F_ServerProgressUpdate("正在准备文件..."));
 
@@ -245,10 +251,10 @@ public final class MCUpdaterServer {
             var file = new File(FilePath.runtime() + "/packs/" + pack + ".zip");
             var id = pack + ".zip";
 
-            var rsum = this.cdn.getCDNFileStatus(id);
+            var cdn_sum = this.cdn.getCDNFileStatus(id);
             var sum = new String(DiffCheck.calculateSHA256(file.getAbsolutePath()), StandardCharsets.UTF_8);
 
-            if (sum.equals(rsum)) {
+            if (sum.equals(cdn_sum)) {
                 cdnPacks.add(pack);
                 continue;
             } else {
@@ -283,10 +289,10 @@ public final class MCUpdaterServer {
             ctx.writeAndFlush(new P14_PatchFileSlice(data, 0)).get();
         }
 
-        ctx.writeAndFlush(new P14_PatchFileSlice(new byte[0], P14_PatchFileSlice.SIG_END));
+        ctx.writeAndFlush(new P14_PatchFileSlice(new byte[0], org.atcraftmc.updater.network.packet.P14_PatchFileSlice.SIG_END));
     }
 
-    public void sendUpdateDataResponse(P10_VersionInfo vi, ChannelHandlerContext ctx) {
+    public void sendUpdateDataResponse(org.atcraftmc.updater.network.packet.P10_VersionInfo vi, ChannelHandlerContext ctx) {
         LOGGER.info("got update request from {}", ctx.channel().remoteAddress());
 
         try {
@@ -294,7 +300,7 @@ public final class MCUpdaterServer {
 
             var addFiles = new ArrayList<pair>();
             var resourcePacks = new ArrayList<String>();
-            var result = new HashSet<P10_VersionInfo.info>();
+            var result = new HashSet<org.atcraftmc.updater.network.packet.P10_VersionInfo.info>();
 
             ctx.writeAndFlush(new P0F_ServerProgressUpdate("正在分析版本并移除过时的文件..."));
 
@@ -336,6 +342,8 @@ public final class MCUpdaterServer {
         }
     }
 
+
+    //access
     public ExecutorService getExecutor() {
         return this.executor;
     }

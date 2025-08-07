@@ -1,6 +1,6 @@
 package org.atcraftmc.updater.server.file;
 
-import org.atcraftmc.updater.channel.UpdateChannelMeta;
+import org.atcraftmc.updater.data.UpdateChannelMeta;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;

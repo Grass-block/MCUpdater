@@ -5,9 +5,9 @@ import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.atcraftmc.mcupdater.cdn.FileLockManager;
 import org.atcraftmc.mcupdater.cdn.MCUpdaterCDNServer;
-import org.atcraftmc.updater.protocol.packet.P13_PatchFileInfo;
-import org.atcraftmc.updater.protocol.packet.P14_PatchFileSlice;
-import org.atcraftmc.updater.protocol.packet.P53_CDNDownloadRequest;
+import org.atcraftmc.updater.network.packet.P13_PatchFileInfo;
+import org.atcraftmc.updater.network.packet.P14_PatchFileSlice;
+import org.atcraftmc.updater.network.packet.P53_CDNDownloadRequest;
 
 import java.io.BufferedInputStream;
 import java.io.File;
