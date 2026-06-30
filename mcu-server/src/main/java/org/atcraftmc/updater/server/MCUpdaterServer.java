@@ -8,7 +8,7 @@ import org.atcraftmc.updater.PatchFile;
 import org.atcraftmc.updater.data.VersionInfo;
 import org.atcraftmc.updater.server.file.FileModifyStatus;
 import org.atcraftmc.updater.network.packet.*;
-import org.atcraftmc.updater.server.file.DiffCheck;
+import org.atcraftmc.updater.DiffCheck;
 import org.atcraftmc.updater.server.service.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;

@@ -4,6 +4,7 @@ plugins {
 
 apply from: "E:/Java/GradleScripts/build-base.gradle"
 apply from: "../github-packages.gradle"
+apply from: "../gbuild.gradle"
 
 group = 'org.atcraftmc'
 version = '1.0-SNAPSHOT'
@@ -12,10 +13,11 @@ applyGlobalScript("Publish/ProjectOutput.gradle")
 applyGlobalScript("Dependencies.gradle")
 
 dependencies {
-    implementation 'me.gb2022.commons:commons-nbt:1.0'
-    implementation 'me.gb2022.commons:commons-math:1.0'
-    implementation 'me.gb2022.commons:commons-container:1.0'
-    implementation 'me.gb2022.commons:commons-general:1.0'
+    implementation gbuildLib("me.gb2022.commons:commons-nbt")
+    implementation gbuildLib("me.gb2022.commons:commons-math")
+    implementation gbuildLib("me.gb2022.commons:commons-container")
+    implementation gbuildLib("me.gb2022.commons:commons-general")
+
     implementation 'com.formdev:flatlaf:3.5.4'
     implementation 'com.google.code.gson:gson:2.12.1'
 
@@ -35,7 +37,7 @@ targetCompatibility = '17'
 
 jar {
     manifest {
-        attributes "Main-Class": "org.atcraftmc.updater.client.ClientBootstrap";
+        attributes "Main-Class": "org.atcraftmc.updater.client.ClientBootstrap"
         attributes "Premain-Class": "org.atcraftmc.updater.client.ClientBootstrap"
     }
     archiveBaseName = "mc-updater-client"

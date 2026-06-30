@@ -3,6 +3,7 @@ package org.atcraftmc.updater.server.file;
 import me.gb2022.commons.math.SHA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.atcraftmc.updater.DiffCheck;
 import org.atcraftmc.updater.FilePath;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -51,15 +52,6 @@ public final class FileStatusManager {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    static boolean compare(byte[] a1, byte[] a2) {
-        for (int i = 0; i < 32; i++) {
-            if (a1[i] != a2[i]) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public static void iterate(File folder, Consumer<File> accepter) {
@@ -118,7 +110,7 @@ public final class FileStatusManager {
             }
 
             //only case if checksum is match!
-            if (compare(bytes, hash)) {
+            if (DiffCheck.compare(bytes, hash)) {
                 return FileModifyStatus.NONE;
             }
 

@@ -10,16 +10,18 @@ version = '1.0'
 
 applyGlobalScript("Publish/ProjectOutput.gradle")
 applyGlobalScript("Dependencies.gradle")
+apply from: "../gbuild.gradle"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'me.gb2022.commons:commons-nbt:1.0'
-    implementation 'me.gb2022.commons:commons-math:1.0'
-    implementation 'me.gb2022.commons:commons-container:1.0'
-    implementation 'me.gb2022.commons:commons-general:1.0'
+    implementation gbuildLib("me.gb2022.commons:commons-nbt")
+    implementation gbuildLib("me.gb2022.commons:commons-math")
+    implementation gbuildLib("me.gb2022.commons:commons-container")
+    implementation gbuildLib("me.gb2022.commons:commons-general")
+
     implementation 'com.google.code.gson:gson:2.12.1'
 
     implementation project(":mcu-common")

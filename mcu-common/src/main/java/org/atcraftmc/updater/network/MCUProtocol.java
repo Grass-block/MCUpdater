@@ -35,6 +35,7 @@ public interface MCUProtocol {
         i.register(0x54, P54_CDNFileChangeAttempt.class);
         i.register(0x55, P55_CDNFileChangeReady.class);
     });
+    int CDN_PAYLOAD_SIZE = 256*1024;//256KiB
 
     static NettyChannelInitializer initializer() {
         return new NettyChannelInitializer().config((i) -> {
