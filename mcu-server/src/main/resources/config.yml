@@ -5,7 +5,7 @@ config:
   rate-delay: 1 #响应网络时的速度限制(ms)
   cdn-server: #CDN下载加速服务器设置
     enable: true
-    address: 127.0.0.1 #目标cd服务器的地址，客户端和服务端都会连接并上传下载文件。
+    address: 127.0.0.1 #目标cdn服务器的地址，客户端和服务端都会连接并上传下载文件。
     port: 63000
     access-token: token-4a08f #用于上传权限的token
     repository: test-server #在CDN服务上，你的前置路径

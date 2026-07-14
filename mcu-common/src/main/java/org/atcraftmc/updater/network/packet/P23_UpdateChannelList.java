@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf;
 import me.gb2022.simpnet.packet.DeserializedConstructor;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.util.BufferUtil;
-import org.atcraftmc.updater.data.UpdateChannelMeta;
+import org.atcgroup.mcupdater.data.UpdateChannelMeta;
 
 import java.util.Collection;
 import java.util.HashSet;

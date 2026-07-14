@@ -1,6 +1,6 @@
 package org.atcraftmc.updater.server.service;
 
-import org.atcraftmc.updater.ProductInfo;
+import org.atcgroup.mcupdater.ProductInfo;
 import org.atcraftmc.updater.server.MCUpdaterServer;
 
 import java.util.Scanner;

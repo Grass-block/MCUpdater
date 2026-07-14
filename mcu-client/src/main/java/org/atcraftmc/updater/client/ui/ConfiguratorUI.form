@@ -15,7 +15,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="2dd6a" class="org.atcraftmc.updater.client.ui.component.SimpleJList" binding="list" custom-create="true">
+          <component id="2dd6a" class="org.atcgroup.mcupdater.client.ui.component.SimpleJList" binding="list" custom-create="true">
             <constraints/>
             <properties/>
           </component>

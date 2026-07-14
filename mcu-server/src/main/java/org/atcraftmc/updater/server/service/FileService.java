@@ -1,7 +1,7 @@
 package org.atcraftmc.updater.server.service;
 
+import org.atcgroup.mcupdater.server.file.FileSource;
 import org.atcraftmc.updater.server.MCUpdaterServer;
-import org.atcraftmc.updater.server.file.FileSource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,10 +27,9 @@ public final class FileService extends Service {
 
     @Override
     public void run() {
-        LOGGER.info("正在加载文件源信息...");
         var config = server().config().getConfigurationSection("channels");
         var ids = config.getKeys(false);
-        LOGGER.info("识别到 {} 个更新频道:", ids.size());
+        LOGGER.info("Loaded {} update channels:", ids.size());
 
         for (var s : ids) {
             var source = new FileSource(s, config.getConfigurationSection(s));
@@ -38,7 +37,7 @@ public final class FileService extends Service {
 
             this.sources.put(s, source);
 
-            LOGGER.info(" - {}({}) [强制: {}] -> {}", meta.id(), meta.name(), meta.required(), source.path());
+            LOGGER.info(" - {}({}) [Enforce: {}] -> {}", meta.id(), meta.name(), meta.required(), source.path());
         }
     }
 

@@ -2,7 +2,7 @@ package org.atcraftmc.updater.client;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import me.gb2022.commons.container.Vector;
-import org.atcraftmc.updater.FilePath;
+import org.atcraftmc.updater.util.FilePath;
 import org.atcraftmc.updater.client.util.ApplicationEntry;
 import org.atcraftmc.updater.client.util.Log;
 
@@ -64,6 +64,8 @@ public interface ClientBootstrap {
 
     static void theme() {
         try {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+
             UIManager.setLookAndFeel(new FlatDarkLaf());
 
             var properties = new Properties();

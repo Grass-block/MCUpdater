@@ -33,5 +33,5 @@ dependencies {
     compileOnly 'io.netty:netty-handler:4.1.119.Final'
     compileOnly 'io.netty:netty-transport:4.1.119.Final'
 
-    implementation localStorage('me.gb2022.simpnet.simpnet-base')
+    implementation gbuildLib('me.gb2022.simpnet:simpnet-base')
 }

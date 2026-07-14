@@ -3,8 +3,9 @@ package org.atcraftmc.mcupdater.cdn.handler;
 import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import org.atcraftmc.mcupdater.cdn.CDNFileManager;
-import org.atcraftmc.mcupdater.cdn.FileLockManager;
+import org.atcgroup.mcupdater.util.FileChecksumManager;
+import org.atcgroup.mcupdater.util.Async;
+import org.atcraftmc.updater.util.FileLockManager;
 import org.atcraftmc.mcupdater.cdn.MCUpdaterCDNServer;
 import org.atcraftmc.updater.network.packet.*;
 
@@ -39,13 +40,6 @@ public final class CDNServerSideHandler extends PacketInboundHandler {
     }
 
 
-
-
-
-
-
-
-
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
         //收到文件上传预定，尝试等待连接的客户端完成下载后且没有正在上传的情况下上锁对应文件以供写入
@@ -58,7 +52,7 @@ public final class CDNServerSideHandler extends PacketInboundHandler {
                 return;
             }
 
-            MCUpdaterCDNServer.WORKER.submit(() -> {
+            Async.WORKER.submit(() -> {
                 while (!requests.isEmpty()) {
                     try {
                         Thread.sleep(10);
@@ -69,7 +63,7 @@ public final class CDNServerSideHandler extends PacketInboundHandler {
                 }
 
                 for (var s : attempt.getTargets()) {
-                    var file = CDNFileManager.getTargetFile(repo, s);
+                    var file = FileChecksumManager.getTargetFile(repo, s);
                     FileLockManager.tryLockWrite(file);
                 }
 
@@ -90,14 +84,14 @@ public final class CDNServerSideHandler extends PacketInboundHandler {
                 ctx.disconnect();
             }
 
-            if (FileLockManager.isWriting(CDNFileManager.getTargetFile(owner, name))) {
+            if (FileLockManager.isWriting(FileChecksumManager.getTargetFile(owner, name))) {
                 LOGGER.info("收到文件状态请求({}), 结果: WRITING", name);
                 ctx.writeAndFlush(new P51_CDNObjectState(owner, name, status.getQueryId(), ""));
                 return;
             }
 
-            LOGGER.info("收到文件状态请求({}), 结果: {}", name, CDNFileManager.getFileStatus(owner, name));
-            ctx.writeAndFlush(new P51_CDNObjectState(owner, name, status.getQueryId(), CDNFileManager.getFileStatus(owner, name)));
+            LOGGER.info("收到文件状态请求({}), 结果: {}", name, FileChecksumManager.getFileStatus(owner, name));
+            ctx.writeAndFlush(new P51_CDNObjectState(owner, name, status.getQueryId(), FileChecksumManager.getFileStatus(owner, name)));
             return;
         }
 
@@ -116,7 +110,7 @@ public final class CDNServerSideHandler extends PacketInboundHandler {
                     this.raFile.close();
                 }
 
-                this.file = CDNFileManager.getTargetFile(repo, name);
+                this.file = FileChecksumManager.getTargetFile(repo, name);
 
                 this.file.getParentFile().mkdirs();
                 this.file.createNewFile();
@@ -134,7 +128,7 @@ public final class CDNServerSideHandler extends PacketInboundHandler {
                 this.raFile.close();
                 this.requests.remove(upload.getName());
                 FileLockManager.unlockWrite(this.file);
-                CDNFileManager.updateFileStatus(repo, name);
+                FileChecksumManager.updateFileStatus(repo, name);
                 LOGGER.info("成功上传: {}-{}bytes", this.file, this.lastWrite);
             }
 

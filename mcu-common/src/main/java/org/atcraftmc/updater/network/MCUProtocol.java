@@ -2,6 +2,7 @@ package org.atcraftmc.updater.network;
 
 import me.gb2022.simpnet.channel.NettyChannelInitializer;
 import me.gb2022.simpnet.packet.PacketRegistry;
+import org.atcgroup.mcupdater.network.packet.*;
 import org.atcraftmc.updater.network.packet.*;
 
 public interface MCUProtocol {
@@ -34,8 +35,16 @@ public interface MCUProtocol {
         i.register(0x53, P53_CDNDownloadRequest.class);
         i.register(0x54, P54_CDNFileChangeAttempt.class);
         i.register(0x55, P55_CDNFileChangeReady.class);
+
+        //cdn protocol V2
+        i.register(0x70, P70_FTPHeader.class);
+        i.register(0x71, P71_FTPPayload.class);
+        i.register(0x72, P72_FTPPayloadReceived.class);
+        i.register(0x73, P73_FTPCancel.class);
+        i.register(0x74, P74_FTPComplete.class);
+        i.register(0x75, P75_FTPCompleteResponse.class);
     });
-    int CDN_PAYLOAD_SIZE = 256*1024;//256KiB
+    int CDN_PAYLOAD_SIZE = 256 * 1024;//256KiB
 
     static NettyChannelInitializer initializer() {
         return new NettyChannelInitializer().config((i) -> {

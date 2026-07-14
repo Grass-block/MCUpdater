@@ -6,28 +6,30 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import me.gb2022.commons.file.FilePath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.atcraftmc.mcupdater.cdn.handler.CDNClientSideHandler;
+import org.atcgroup.mcupdater.network.ErrorCatchHandler;
+import org.atcgroup.mcupdater.network.handler.FileServerHandler;
+import org.atcgroup.mcupdater.network.handler.HeartBeatHandler;
 import org.atcraftmc.mcupdater.cdn.handler.CDNServerSideHandler;
-import org.atcraftmc.updater.network.handler.ErrorCatchHandler;
-import org.atcraftmc.updater.network.handler.HeartBeatHandler;
+import org.atcraftmc.mcupdater.cdn.handler.CDNUploadReceiveHandler;
 import org.atcraftmc.updater.network.MCUProtocol;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public final class MCUpdaterCDNServer implements Runnable {
     public static final MCUpdaterCDNServer INSTANCE = new MCUpdaterCDNServer();
 
     public static final Logger LOGGER = LogManager.getLogger("MCU-CDNServer");
-    public static final ExecutorService WORKER = Executors.newCachedThreadPool();
     private final NioEventLoopGroup bossGroup = new NioEventLoopGroup();
     private final NioEventLoopGroup workerGroup = new NioEventLoopGroup();
+
+    private final FileStatusManager fileManager = new FileStatusManager();
+
 
     private final Properties props = new Properties();
 
@@ -62,15 +64,26 @@ public final class MCUpdaterCDNServer implements Runnable {
         LOGGER.info("正在启动网络服务...");
 
         try {
-            ServerBootstrap sbs = new ServerBootstrap();
-            sbs.group(this.bossGroup, this.workerGroup);
-            sbs.channel(NioServerSocketChannel.class);
-            sbs.option(ChannelOption.SO_BACKLOG, 128);
-            sbs.childOption(ChannelOption.SO_KEEPALIVE, true);
-            sbs.handler(new LoggingHandler(LogLevel.INFO));
-            sbs.childHandler(MCUProtocol.initializer().handler(HeartBeatHandler::new).handler(ErrorCatchHandler::new).handler(CDNServerSideHandler::new).handler(CDNClientSideHandler::new));
+            var bootstrap = new ServerBootstrap();
 
-            var cf = sbs.bind(Integer.parseInt(port)).sync();
+            bootstrap.group(this.bossGroup, this.workerGroup);
+            bootstrap.channel(NioServerSocketChannel.class);
+            bootstrap.option(ChannelOption.SO_BACKLOG, 128);
+            bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
+            bootstrap.handler(new LoggingHandler(LogLevel.INFO));
+
+            var i = MCUProtocol.initializer();
+
+            i.handler(HeartBeatHandler::new);
+            i.handler(ErrorCatchHandler::new);
+            i.handler(CDNServerSideHandler::new);
+
+            i.handler(() -> new CDNUploadReceiveHandler(this.fileManager));
+            i.handler(() -> new FileServerHandler(FilePath.RUNTIME));
+
+            bootstrap.childHandler(i);
+
+            var cf = bootstrap.bind(Integer.parseInt(port)).sync();
 
             LOGGER.info("成功启动网络服务于 {}:{}", address, port);
 

@@ -1,5 +1,9 @@
 package org.atcraftmc.updater.client;
 
+import org.atcgroup.mcupdater.client.ClientInstallationInfo;
+import org.atcgroup.mcupdater.client.Config;
+import org.atcgroup.mcupdater.client.ui.MainWindow;
+import org.atcgroup.mcupdater.network.packet.P01_ServerHello;
 import org.atcraftmc.updater.client.network.VersionChannelRequestHandler;
 import org.atcraftmc.updater.client.ui.ConfiguratorUI;
 import org.atcraftmc.updater.client.ui.ErrorUI;
@@ -19,6 +23,10 @@ import java.util.stream.Collectors;
 
 public final class MCUpdaterClient {
     public static final MCUpdaterClient INSTANCE = new MCUpdaterClient();
+
+    private final Config config = new Config();
+
+
     final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final BlockingQueue<Object> lock = new ArrayBlockingQueue<>(1);
     private final ClientInstallationInfo info = new ClientInstallationInfo();
@@ -32,6 +40,10 @@ public final class MCUpdaterClient {
         var port = Integer.parseInt(address[1]);
 
         this.networkController = new ClientNetworkService(addr, port);
+    }
+
+    public Config getConfig() {
+        return config;
     }
 
     private void requestUpdate() {

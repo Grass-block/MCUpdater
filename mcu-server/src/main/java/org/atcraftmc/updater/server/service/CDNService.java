@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import org.atcraftmc.updater.FilePath;
+import org.atcraftmc.updater.util.FilePath;
 import org.atcraftmc.updater.network.CDNClient;
 import org.atcraftmc.updater.network.packet.P50_CDNCheckObjectStatus;
 import org.atcraftmc.updater.network.packet.P54_CDNFileChangeAttempt;

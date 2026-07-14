@@ -7,8 +7,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import me.gb2022.simpnet.packet.Packet;
-import org.atcraftmc.updater.network.handler.ErrorCatchHandler;
-import org.atcraftmc.updater.network.handler.HeartBeatHandler;
+import org.atcgroup.mcupdater.network.ErrorCatchHandler;
+import org.atcgroup.mcupdater.network.handler.HeartBeatHandler;
 import org.atcraftmc.updater.network.handler.CDNQueryHandler;
 import org.atcraftmc.updater.network.packet.QueryPacket;
 

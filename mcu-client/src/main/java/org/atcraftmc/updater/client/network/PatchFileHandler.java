@@ -2,8 +2,8 @@ package org.atcraftmc.updater.client.network;
 
 import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.packet.Packet;
-import org.atcraftmc.updater.FilePath;
-import org.atcraftmc.updater.PatchFile;
+import org.atcraftmc.updater.util.FilePath;
+import org.atcgroup.mcupdater.PatchFile;
 import org.atcraftmc.updater.client.Event;
 import org.atcraftmc.updater.client.util.DeferredTaskManager;
 import org.atcraftmc.updater.client.util.Log;

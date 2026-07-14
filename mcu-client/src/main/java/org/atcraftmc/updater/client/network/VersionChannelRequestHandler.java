@@ -3,7 +3,7 @@ package org.atcraftmc.updater.client.network;
 import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import org.atcraftmc.updater.data.UpdateChannelMeta;
+import org.atcgroup.mcupdater.data.UpdateChannelMeta;
 import org.atcraftmc.updater.client.util.Log;
 import org.atcraftmc.updater.network.packet.P22_UpdateChannelDataRequest;
 import org.atcraftmc.updater.network.packet.P23_UpdateChannelList;

@@ -12,7 +12,7 @@ import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.atcraftmc.updater.network.MCUProtocol;
 import org.atcraftmc.updater.network.packet.*;
 import org.atcraftmc.updater.server.MCUpdaterServer;
-import org.atcraftmc.updater.server.file.FileSource;
+import org.atcgroup.mcupdater.server.file.FileSource;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

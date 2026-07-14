@@ -1,8 +1,8 @@
 package org.atcraftmc.updater.server.service;
 
 import com.google.gson.JsonParser;
-import org.atcraftmc.updater.FilePath;
-import org.atcraftmc.updater.PatchFile;
+import org.atcraftmc.updater.util.FilePath;
+import org.atcgroup.mcupdater.PatchFile;
 import org.atcraftmc.updater.data.VersionInfo;
 import org.atcraftmc.updater.server.MCUpdaterServer;
 

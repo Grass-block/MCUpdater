@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.atcgroup.mcupdater.client.ui.screen.WelcomeScreen">
+  <grid id="27dc6" binding="root" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="796" height="549"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="c445b" layout-manager="GridBagLayout">
+        <constraints border-constraint="Center"/>
+        <properties>
+          <enabled value="true"/>
+          <maximumSize width="200" height="200"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="8aeb1" class="org.atcgroup.mcupdater.client.ui.component.ImagePanel" binding="clientIcon" custom-create="true">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="2" indent="0" use-parent-layout="false">
+                <minimum-size width="256" height="256"/>
+                <preferred-size width="256" height="256"/>
+                <maximum-size width="256" height="256"/>
+              </grid>
+              <gridbag top="0" left="0" bottom="16" right="0" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <maximumSize width="140" height="140"/>
+              <minimumSize width="140" height="140"/>
+              <preferredSize width="140" height="140"/>
+            </properties>
+          </component>
+          <component id="2b3ad" class="javax.swing.JLabel" binding="clientName">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <gridbag top="0" left="0" bottom="16" right="0" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <font size="26"/>
+              <horizontalAlignment value="0"/>
+              <text value="Label"/>
+            </properties>
+          </component>
+          <component id="ff2e8" class="javax.swing.JButton" binding="startButton">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="0" left="0" bottom="8" right="0" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <maximumSize width="160" height="40"/>
+              <minimumSize width="160" height="40"/>
+              <preferredSize width="160" height="40"/>
+              <text value="开始安装"/>
+            </properties>
+          </component>
+          <component id="d8535" class="javax.swing.JButton" binding="extraButton">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="0" left="0" bottom="30" right="0" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <maximumSize width="160" height="40"/>
+              <minimumSize width="160" height="40"/>
+              <preferredSize width="160" height="40"/>
+              <text value="用户协议"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

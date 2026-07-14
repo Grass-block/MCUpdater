@@ -42,7 +42,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="4ac0a" class="org.atcraftmc.updater.client.ui.component.SimpleJList" binding="list">
+          <component id="4ac0a" class="org.atcgroup.mcupdater.client.ui.component.SimpleJList" binding="list">
             <constraints/>
             <properties/>
           </component>

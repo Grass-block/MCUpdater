@@ -1,11 +1,11 @@
 package org.atcraftmc.updater.client.ui;
 
 
+import org.atcraftmc.updater.UpdateOperationListener;
 import org.atcraftmc.updater.client.ClientBootstrap;
+import org.atcgroup.mcupdater.client.ui.component.ImagePanel;
 import org.atcraftmc.updater.client.ui.framework.UI;
 import org.atcraftmc.updater.client.ui.framework.UIHandle;
-import org.atcraftmc.updater.client.ui.component.ImagePanel;
-import org.atcraftmc.updater.UpdateOperationListener;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -45,7 +45,7 @@ public final class MainWindowUI extends UI<MainWindowUI> implements UpdateOperat
         frame.setContentPane(this.root);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setResizable(false);
-        frame.setSize(720, 480);
+        frame.setSize(960, 540);
     }
 
     /**

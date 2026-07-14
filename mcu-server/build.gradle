@@ -34,7 +34,7 @@ dependencies {
     implementation 'io.netty:netty-transport:4.1.119.Final'
     implementation projectLocal("bukkit-configuration")
 
-    implementation localStorage('me.gb2022.simpnet.simpnet-base')
+    implementation gbuildLib('me.gb2022.simpnet:simpnet-base')
     implementation("org.yaml:snakeyaml:1.19")
 
     implementation "org.apache.logging.log4j:log4j-core:2.8.1"

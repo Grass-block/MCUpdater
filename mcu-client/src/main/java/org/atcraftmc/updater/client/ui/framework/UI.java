@@ -15,6 +15,10 @@ public abstract class UI<I extends UI<I>> {
 
     public abstract void build(JFrame frame);
 
+    public JPanel getRootPanel() {
+        return null;
+    }
+
     public void setup(UIHandle<I> handle) {
     }
 }

@@ -1,7 +1,7 @@
 package org.atcraftmc.updater.client.ui;
 
 import org.atcraftmc.updater.client.ClientBootstrap;
-import org.atcraftmc.updater.client.ui.component.SimpleJList;
+import org.atcgroup.mcupdater.client.ui.component.SimpleJList;
 import org.atcraftmc.updater.client.ui.framework.SwingUtil;
 import org.atcraftmc.updater.network.packet.P10_VersionInfo;
 
