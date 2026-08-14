@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+apply from: "E:/Java/GradleScripts/build-base.gradle"
+apply from: "../github-packages.gradle"
+
+group = 'org.atcraftmc'
+version = '1.0'
+
+applyGlobalScript("Publish/ProjectOutput.gradle")
+applyGlobalScript("Dependencies.gradle")
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.apache.logging.log4j:log4j-core:2.8.1"
+    implementation 'io.netty:netty-buffer:4.1.119.Final'
+    implementation 'io.netty:netty-codec:4.1.119.Final'
+    implementation 'io.netty:netty-handler:4.1.119.Final'
+    implementation 'io.netty:netty-transport:4.1.119.Final'
+
+    implementation project(":mcu-common")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar{
+    manifest{
+        attributes "Main-Class":"org.atcraftmc.mcupdater.cdn.MCUpdaterCDNServer";
+    }
+    archiveBaseName="mc-updater-cdn"
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    from {
+        (configurations.runtimeClasspath).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}

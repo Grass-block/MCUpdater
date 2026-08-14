@@ -1,0 +1,109 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.text.SimpleDateFormat
+
+//mklink /H gbuild.gradle E:\Java\GBuild\gbuild.gradle
+
+def GBUILD_WORKSPACE = "E:/Java/GBuild"
+
+//---[repo]---
+project.ext.jitpackRepo = { return project.repositories.maven { name = 'jitpack-repo'; url 'https://jitpack.io' } }
+project.ext.spigotmcRepo = { return project.repositories.maven { name = 'spigotmc-repo'; url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" } }
+project.ext.papermcRepo = { return project.repositories.maven { name = 'papermc-repo'; url = 'https://repo.papermc.io/repository/maven-public/' } }
+project.ext.sonatypeRepo = { return project.repositories.maven { name = "sonatype"; url = "https://oss.sonatype.org/content/groups/public/" } }
+project.ext.papiRepo = { return project.repositories.maven { name = "placeholder-api"; url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' } }
+
+project.ext.projectLib = { lib -> return files("${rootDir.getAbsolutePath()}/libraries/${lib}.jar") }
+project.ext.localStorage = { lib -> return files("E:/Java/GlobalResources/Libraries/${lib.replace(".", "/")}.jar") }
+project.ext.gbuildLib = { lib ->
+    var gbuild_path = "${GBUILD_WORKSPACE}/Libraries/${lib.replace(":", "/")}.jar"
+    var local_path = "${rootDir.getAbsolutePath()}/libraries/gbuild/${lib.replace(":", "/")}.jar"
+
+    var remote = new File(gbuild_path)
+    var local = new File(local_path)
+    var remote_valid = remote.exists()
+    var local_valid = local.exists()
+
+    if (!(remote_valid || local_valid)) {
+        throw new RuntimeException("failed to resolve gbuild lib: ${lib} , both gbuild global library and project library is not present.")
+    }
+
+    if (!local_valid) {
+        local.getParentFile().mkdirs()
+        local.createNewFile()
+        Files.copy(remote.toPath(), local.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        println("Downloaded lib ${lib} (${remote.lastModified()} > ${local.lastModified()})")
+        return files(local_path)
+    }
+
+    if (remote.lastModified() > local.lastModified() || remote.length() != local.length()) {
+        println("Updating lib ${lib} (${remote.lastModified()} > ${local.lastModified()})")
+        Files.copy(remote.toPath(), local.toPath(), StandardCopyOption.REPLACE_EXISTING)
+    }
+
+    return files(local_path)
+}
+
+project.ext.setJavaCompatibility = { version ->
+    project.compileJava.sourceCompatibility = version
+    project.compileJava.targetCompatibility = version
+}
+
+project.ext.publish_gbuild = {
+    project.tasks.register('GBuild Publish', Copy) {
+        from jar.archiveFile
+        into file("${GBUILD_WORKSPACE}/Libraries/${project.group}")
+    }
+
+    project.build.dependsOn 'GBuild Publish'
+}
+
+
+//dependencies:
+
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+project.ext.applyScript = { path ->
+    println "> Apply script: $path"
+    apply from: rootDir.getAbsolutePath() + "/script/" + path
+}
+project.ext.applyGlobalScript = { path ->
+    println "> Apply script: $path"
+    apply from: "E:/Java/GradleScripts/" + path
+}
+
+project.ext.publish_gbuild = {
+    project.tasks.register('GBuild Publish', Copy) {
+        from jar.archiveFile
+        into file("${GBUILD_WORKSPACE}/Libraries/${project.group}")
+    }
+
+    project.build.dependsOn 'GBuild Publish'
+}
+
+project.ext.publish_output = {
+    project.tasks.register('Output Publish', Copy) {
+        from jar.archiveFile
+        into file(rootProject.getProjectDir().getAbsolutePath() + "/productions")
+    }
+
+    project.build.dependsOn 'Output Publish'
+}
+
+
+project.ext.buildTime = {
+    return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
+}
+
+
+jar {
+    archiveVersion = ""
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    from {
+        (configurations.runtimeClasspath).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
