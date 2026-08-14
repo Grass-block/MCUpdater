@@ -1,7 +1,7 @@
 package org.atcgroup.mcupdater.client.ui.screen;
 
+import org.atcgroup.mcupdater.client.MCUpdaterClient;
 import org.atcgroup.mcupdater.client.ui.UI;
-import org.atcraftmc.updater.client.ClientBootstrap;
 import org.atcgroup.mcupdater.client.ui.component.ImagePanel;
 
 import javax.swing.*;
@@ -24,7 +24,7 @@ public final class WelcomeScreen extends Screen {
 
     public WelcomeScreen(Runnable next) {
         $$$setupUI$$$();
-        this.clientName.setText(ClientBootstrap.config().brand());
+        this.clientName.setText(MCUpdaterClient.instance().config().brand());
         this.startButton.addActionListener(e -> next.run());
     }
 

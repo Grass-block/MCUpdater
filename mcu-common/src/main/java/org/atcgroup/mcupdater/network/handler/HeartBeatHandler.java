@@ -5,8 +5,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.EventExecutor;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import org.atcraftmc.updater.network.Tickable;
-import org.atcraftmc.updater.network.packet.P00_KeepAlive;
+import org.atcgroup.mcupdater.util.Tickable;
+import org.atcgroup.mcupdater.network.packet.P00_KeepAlive;
 
 import java.util.concurrent.TimeUnit;
 

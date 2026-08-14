@@ -7,8 +7,12 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 public interface UI {
+    NumberFormat NUMBER_FORMAT = new DecimalFormat("###.##");
+
     static Icon icon(Ikon icon) {
         var i = new FontIcon();
 

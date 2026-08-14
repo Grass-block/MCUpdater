@@ -24,4 +24,12 @@ public final class P72_FTPPayloadReceived implements Packet {
     public void write(ByteBuf byteBuf) {
         byteBuf.writeLong(this.id);
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("P72_FTPPayloadReceived{");
+        sb.append("id=").append(id);
+        sb.append('}');
+        return sb.toString();
+    }
 }

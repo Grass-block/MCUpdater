@@ -1,0 +1,130 @@
+{
+  "bootstrap.complete": {
+    "zh-CN": "全部服务启动完成! ({0}ms)",
+    "en-US": "All services initialized! ({0}ms)"
+  },
+  "console.stop": {
+    "zh-CN": "正在关闭控制台服务...",
+    "en-US": "Stopping console service..."
+  },
+  "console.input": {
+    "zh-CN": ">> {0}",
+    "en-US": ">> {0}"
+  },
+  "console.reload": {
+    "zh-CN": "正在重新加载配置文件...",
+    "en-US": "Reloading configuration file..."
+  },
+  "console.reload.complete": {
+    "zh-CN": "配置文件已经更新。网络服务需要重启才能应用修改。",
+    "en-US": "Configuration file updated. The network service needs to be restarted to apply changes."
+  },
+  "console.cdn_upload": {
+    "zh-CN": "正在上传全部本地资源...",
+    "en-US": "Uploading all local resources..."
+  },
+  "console.help.header": {
+    "zh-CN": "==========[帮助信息]==========",
+    "en-US": "==========[Help]=========="
+  },
+  "console.help.stop": {
+    "zh-CN": " - stop: 停止服务器",
+    "en-US": " - stop: Stop the server"
+  },
+  "console.help.reload": {
+    "zh-CN": " - reload: 重新加载服务器配置",
+    "en-US": " - reload: Reload the server configuration"
+  },
+  "console.help.help": {
+    "zh-CN": " - help: 显示帮助信息",
+    "en-US": " - help: Show help information"
+  },
+  "console.help.build": {
+    "zh-CN": " - build <频道> <版本>: 构建版本",
+    "en-US": " - build <channel> <version>: Build a version"
+  },
+  "console.help.cdn_upload": {
+    "zh-CN": " - cdn-upload: 上传所有本地资源包",
+    "en-US": " - cdn-upload: Upload all local resource packs"
+  },
+  "server.config.not_found": {
+    "zh-CN": "没有找到默认的配置文件，正在覆盖生成...",
+    "en-US": "Default configuration file not found, generating it..."
+  },
+  "server.config.generated": {
+    "zh-CN": "配置文件生成于 {0}",
+    "en-US": "Configuration file generated at {0}"
+  },
+  "server.config.load_error": {
+    "zh-CN": "读取配置文件时发生错误!",
+    "en-US": "An error occurred while reading the configuration file!"
+  },
+  "network.start": {
+    "zh-CN": "正在启动网络服务...",
+    "en-US": "Starting network service..."
+  },
+  "network.started": {
+    "zh-CN": "网络服务已启动于 {0}:{1}",
+    "en-US": "Network server started on {0}:{1}"
+  },
+  "network.error": {
+    "zh-CN": "网络错误，正在停止服务器...",
+    "en-US": "Network error occurred, stopping server..."
+  },
+  "network.stop": {
+    "zh-CN": "正在停止网络服务...",
+    "en-US": "Stopping network service..."
+  },
+  "network.session.created": {
+    "zh-CN": "新会话已创建: {0}",
+    "en-US": "New session created: {0}"
+  },
+  "file.status.directory_created": {
+    "zh-CN": "已创建目录 {0}",
+    "en-US": "created directory {0}"
+  },
+  "file.status.sha_incorrect": {
+    "zh-CN": "发现不正确的 SHA 文件 {0}",
+    "en-US": "find incorrect sha file {0}"
+  },
+  "service.exception": {
+    "zh-CN": "在传递 {0} 到 {1} 时发生错误",
+    "en-US": "An error occurred while passing {0} to {1}"
+  },
+  "version.source.loading": {
+    "zh-CN": "正在加载数据源信息...",
+    "en-US": "Loading source information..."
+  },
+  "version.source.entry": {
+    "zh-CN": " - {0}({1}) [强制: {2}] -> {3}",
+    "en-US": " - {0}({1}) [Enforce: {2}] -> {3}"
+  },
+  "version.channels.loaded": {
+    "zh-CN": "已加载 {0} 个更新频道:",
+    "en-US": "Loaded {0} update channels:"
+  },
+  "version.source.versions_loaded": {
+    "zh-CN": "数据源 {0} 加载了 {1} 个版本。",
+    "en-US": "Source {0} loaded {1} versions."
+  },
+  "version.install.generating": {
+    "zh-CN": "正在生成 {0} 的默认安装信息...",
+    "en-US": "Generating default install info for {0}..."
+  },
+  "version.directory_created": {
+    "zh-CN": "已创建目录 {0}",
+    "en-US": "created directory {0}"
+  },
+  "version.install.updating": {
+    "zh-CN": "正在更新安装信息...",
+    "en-US": "Updating install info..."
+  },
+  "version.registered": {
+    "zh-CN": "版本 {0}-{1} 注册成功, 请在 {2} 填写更新日志。",
+    "en-US": "Version {0}-{1} registered successfully. Please fill in the update log at {2}."
+  },
+  "version.install.resource_pack": {
+    "zh-CN": "正在更新安装资源包...",
+    "en-US": "Updating install resource pack..."
+  }
+}

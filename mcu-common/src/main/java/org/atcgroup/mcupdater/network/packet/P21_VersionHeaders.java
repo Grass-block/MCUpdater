@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import me.gb2022.simpnet.packet.DeserializedConstructor;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.util.BufferUtil;
+import org.atcgroup.mcupdater.data.VersionSet;
 import org.atcgroup.mcupdater.util.FileChecksumManager;
 import org.atcgroup.mcupdater.data.DownloadFileList;
 import org.atcgroup.mcupdater.data.VersionInfo;
@@ -14,10 +15,12 @@ import java.util.Set;
 
 public final class P21_VersionHeaders implements Packet {
     private final Set<VersionInfo> versions;
+    private final VersionSet versionSet;
     private final DownloadFileList fileList;
 
-    public P21_VersionHeaders(Set<VersionInfo> versions, FileChecksumManager checksumManager) {
+    public P21_VersionHeaders(Set<VersionInfo> versions, VersionSet versionSet, FileChecksumManager checksumManager) {
         this.versions = versions;
+        this.versionSet = versionSet;
         this.fileList = new DownloadFileList(versions, checksumManager);
     }
 
@@ -37,14 +40,14 @@ public final class P21_VersionHeaders implements Packet {
             var updateFileList = new HashMap<String, String>();
             var downloadFileList = new HashMap<String, String>();
 
-            var packListLen = buffer.readInt();
-            for (var i = 0; i < packListLen; i++) {
-                downloadPackList.add(BufferUtil.readString(buffer));
-            }
-
             var deleteFileLen = buffer.readInt();
             for (var i = 0; i < deleteFileLen; i++) {
                 deleteFileList.add(BufferUtil.readString(buffer));
+            }
+
+            var packListLen = buffer.readInt();
+            for (var i = 0; i < packListLen; i++) {
+                downloadPackList.add(BufferUtil.readString(buffer));
             }
 
             var updateFileLen = buffer.readInt();
@@ -52,7 +55,8 @@ public final class P21_VersionHeaders implements Packet {
                 updateFileList.put(BufferUtil.readString(buffer), BufferUtil.readString(buffer));
             }
 
-            for (var i = 0; i < downloadPackList.size(); i++) {
+            var downloadFileLen = buffer.readInt();
+            for (var i = 0; i < downloadFileLen; i++) {
                 downloadFileList.put(BufferUtil.readString(buffer), BufferUtil.readString(buffer));
             }
 
@@ -61,11 +65,13 @@ public final class P21_VersionHeaders implements Packet {
             this.versions.add(ver);
         }
 
+        this.versionSet = new VersionSet(buffer);
     }
 
     @Override
     public void write(ByteBuf buffer) {
         this.fileList.serialize(buffer);
+
         buffer.writeInt(this.versions.size());
 
         for (var ver : this.versions) {
@@ -103,6 +109,8 @@ public final class P21_VersionHeaders implements Packet {
                 BufferUtil.writeString(buffer, e.getValue());
             }
         }
+
+        this.versionSet.write(buffer);
     }
 
     public Set<VersionInfo> getVersions() {
@@ -111,5 +119,9 @@ public final class P21_VersionHeaders implements Packet {
 
     public DownloadFileList getFileList() {
         return fileList;
+    }
+
+    public VersionSet getVersionSet() {
+        return versionSet;
     }
 }

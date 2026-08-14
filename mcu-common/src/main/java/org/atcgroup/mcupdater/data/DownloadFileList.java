@@ -25,20 +25,29 @@ public final class DownloadFileList extends HashMap<String, Map<String, byte[]>>
         }
     }
 
+    public DownloadFileList() {
+        super();
+    }
+
     public DownloadFileList(Set<VersionInfo> versions, FileChecksumManager checksumManager) {
         for (var v : versions) {
             var channel = v.getChannel();
             var files = this.computeIfAbsent(channel, k -> new HashMap<>());
 
             for (var d : v.getDownloadPackList()) {
-                files.put(d, checksumManager.getFileChecksum(channel, d));
+                var sum = checksumManager.getFileChecksum(d);
+                files.put(d, sum);
             }
 
             //todo: std: file-resourceId order
             for (var d : v.getUpdateFileList().values()) {
-                files.put(d, checksumManager.getFileChecksum(channel, d));
+                files.put(d, checksumManager.getFileChecksum(d));
             }
         }
+    }
+
+    public void addFile(String channel, String file, byte[] sum) {
+        this.computeIfAbsent(channel, k -> new HashMap<>()).put(file, sum);
     }
 
     public void serialize(ByteBuf buffer) {

@@ -3,8 +3,8 @@ package org.atcgroup.mcupdater.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
+import org.atcgroup.mcupdater.network.MCUProtocolV2;
 import org.atcgroup.mcupdater.network.packet.*;
-import org.atcraftmc.updater.network.MCUProtocol;
 import org.atcgroup.mcupdater.util.DiffCheck;
 
 import java.io.File;
@@ -14,7 +14,6 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
     private File file;
     private String user;
     private RandomAccessFile randomAccessFile;
-    private long currentPacketId;
     private byte[] sha256;
     private long len;
 
@@ -22,7 +21,11 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
 
     public abstract void onWriteStart(File file, P70_FTPHeader header);
 
-    public abstract void onWriteComplete(File file);
+    public abstract void onWriteComplete(String user, File file);
+
+    public void onProcess(String name, long received, long total) {
+
+    }
 
     public boolean validateConnection(String user, String token) {
         return true;
@@ -44,46 +47,57 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
             }
 
             this.file = this.getFile(header);
+
+            this.file.getParentFile().mkdirs();
+
+            if (!this.file.exists()) {
+                this.file.createNewFile();
+            }
+
             this.randomAccessFile = new RandomAccessFile(this.file, "rw");
-            this.currentPacketId = 0;
+            this.randomAccessFile.setLength(0);
             this.sha256 = header.getSha256();
-            this.len = this.file.length();
+            this.len = header.getTotalLength();
             this.user = header.getUser();
 
             this.onWriteStart(this.file, header);
 
-            ctx.writeAndFlush(new P72_FTPPayloadReceived(-1));
+            MCUProtocolV2.sendPacket(ctx, new P72_FTPPayloadReceived(-1));
             return;
         }
 
         if (packet instanceof P71_FTPPayload payload) {
-            if (this.currentPacketId != payload.getId()) {
-                ctx.disconnect();
-            }
-
-            this.currentPacketId++;
-
-            var offset = this.currentPacketId * MCUProtocol.CDN_PAYLOAD_SIZE;
+            var offset = payload.getId() * MCUProtocolV2.CDN_PAYLOAD_SIZE;
+            var data = payload.getData();
 
             this.randomAccessFile.seek(offset);
-            this.randomAccessFile.write(payload.getData());
+            this.randomAccessFile.write(data);
 
-            ctx.writeAndFlush(new P72_FTPPayloadReceived(this.currentPacketId));
+            this.onProcess(this.file.getName(), offset + data.length, this.len);
+
+            MCUProtocolV2.sendPacket(ctx, new P72_FTPPayloadReceived(payload.getId()));
             return;
         }
 
         if (packet instanceof P74_FTPComplete) {
             var targetSHA256 = DiffCheck.calculateSHA256(this.file);
 
-            if (DiffCheck.compare(targetSHA256, this.sha256) && this.len == this.randomAccessFile.length()) {
-                ctx.writeAndFlush(new P75_FTPCompleteResponse(true));
-                this.randomAccessFile.close();
-
-                this.onWriteComplete(this.file);
+            if (this.len != this.randomAccessFile.length()) {
+                System.out.println(this.file.getName() + " failed - length mismatch - " + randomAccessFile.length() + "/" + this.len);
+                MCUProtocolV2.sendPacket(ctx, new P75_FTPCompleteResponse(false));
                 return;
             }
 
-            ctx.writeAndFlush(new P75_FTPCompleteResponse(false));
+            if (!DiffCheck.compare(targetSHA256, this.sha256)) {
+                System.out.println(this.file.getName() + " failed - SHA256 mismatch!");
+                MCUProtocolV2.sendPacket(ctx, new P75_FTPCompleteResponse(false));
+                return;
+            }
+
+            MCUProtocolV2.sendPacket(ctx, new P75_FTPCompleteResponse(true));
+            this.randomAccessFile.close();
+
+            this.onWriteComplete(this.user,this.file);
             return;
         }
 

@@ -26,8 +26,8 @@ public final class ClientNetworkService {
         var group = new NioEventLoopGroup();
         var bs = new Bootstrap();
         var protocol = MCUProtocolV2.initializer()
-                .handler(DebugHandler::new)
-                //.handler(ClientFileReceiveHandler::new)
+                //.handler(DebugHandler::new)
+                .handler(ClientFileReceiveHandler::new)
                 .handler(() -> new ClientMainHandler(this.client));
 
         try {

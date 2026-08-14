@@ -1,7 +1,7 @@
 package org.atcgroup.mcupdater.client.ui.screen;
 
+import org.atcgroup.mcupdater.client.MCUpdaterClient;
 import org.atcgroup.mcupdater.client.ui.UI;
-import org.atcraftmc.updater.client.ClientBootstrap;
 import org.atcgroup.mcupdater.client.ui.component.ImagePanel;
 
 import javax.swing.*;
@@ -15,14 +15,14 @@ public final class StartScreen extends Screen {
     private JPanel root;
     private JLabel clientName;
 
+    public StartScreen() {
+        $$$setupUI$$$();
+        this.clientName.setText(MCUpdaterClient.instance().config().brand());
+    }
+
     private void createUIComponents() {
         this.clientIcon = new ImagePanel();
         this.clientIcon.paintImage(UI.image("/icon.png"));
-    }
-
-    public StartScreen() {
-        $$$setupUI$$$();
-        this.clientName.setText(ClientBootstrap.config().brand());
     }
 
     /**

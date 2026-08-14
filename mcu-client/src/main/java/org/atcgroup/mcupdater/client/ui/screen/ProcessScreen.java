@@ -1,7 +1,7 @@
 package org.atcgroup.mcupdater.client.ui.screen;
 
 
-import org.atcraftmc.updater.UpdateOperationListener;
+import org.atcgroup.mcupdater.util.UpdateOperationListener;
 import org.atcgroup.mcupdater.client.ui.component.ImagePanel;
 
 import javax.imageio.ImageIO;
@@ -162,13 +162,18 @@ public final class ProcessScreen extends Screen implements UpdateOperationListen
     }
 
     public void setUnsureProcess(String title) {
-        this.progress.setIndeterminate(true);
-        this.operation.setText(title);
+        SwingUtilities.invokeLater(() -> {
+            this.progress.setIndeterminate(true);
+            this.operation.setText(title);
+        });
     }
 
     @Override
     public void setProgress(int prog) {
-        this.progress.setValue(prog);
+        SwingUtilities.invokeLater(() -> {
+            this.progress.setIndeterminate(false);
+            this.progress.setValue(prog);
+        });
     }
 
     @Override

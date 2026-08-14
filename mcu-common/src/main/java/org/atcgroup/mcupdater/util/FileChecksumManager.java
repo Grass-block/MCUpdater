@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FileChecksumManager {
+public final class FileChecksumManager {
     private final FilePath root;
     private final Map<String, byte[]> checksums = new HashMap<>();
 
@@ -17,21 +17,16 @@ public class FileChecksumManager {
         this.root = root;
     }
 
-    private String key(String owner, String name) {
-        return owner + ":" + name;
+    private File getChecksumFile(String path) {
+        return this.root.append(path + ".sum").file();
     }
 
-    private File getChecksumFile(String owner, String path) {
-        return this.root.append(owner).append(path + ".sum").file();
-    }
-
-    public byte[] updateFileChecksum(String owner, String path) {
-        var std = getChecksumFile(owner, path);
-        var file = this.root.append(owner).append(path).file();
-        var k = key(owner, path);
+    public byte[] updateFileChecksum(String path) {
+        var std = getChecksumFile(path);
+        var file = this.root.append(path).file();
 
         if (!file.exists() || file.length() == 0) {
-            return null;
+            return new byte[0];
         }
 
         if (!std.exists() || std.length() == 0) {
@@ -45,7 +40,7 @@ public class FileChecksumManager {
 
         var sum = DiffCheck.calculateSHA256(file);
 
-        this.checksums.put(k, sum);
+        this.checksums.put(path, sum);
 
         try (var o = new FileOutputStream(std)) {
             o.write(sum);
@@ -56,26 +51,29 @@ public class FileChecksumManager {
         return sum;
     }
 
-    public byte[] getFileChecksum(String owner, String path) {
-        var k = this.key(owner, path);
+    public byte[] getFileChecksum(String path) {
 
-        if (this.checksums.containsKey(k)) {
-            return this.checksums.get(k);
+        if (this.checksums.containsKey(path) && this.checksums.get(path) != null) {
+            return this.checksums.get(path);
         }
 
-        var std = getChecksumFile(owner, path);
+        var std = getChecksumFile(path);
 
         if (!std.exists() || std.length() == 0) {
-            return updateFileChecksum(owner, path);
+            return updateFileChecksum(path);
         }
 
         try (var in = new FileInputStream(std)) {
             var sum = in.readAllBytes();
 
-            this.checksums.put(k, sum);
+            this.checksums.put(path, sum);
             return sum;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public FilePath getRoot() {
+        return this.root;
     }
 }

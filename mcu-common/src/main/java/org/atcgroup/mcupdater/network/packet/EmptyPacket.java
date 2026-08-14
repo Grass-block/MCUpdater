@@ -6,7 +6,6 @@ import me.gb2022.simpnet.packet.Packet;
 
 public abstract class EmptyPacket implements Packet {
     public EmptyPacket() {
-
     }
 
     @DeserializedConstructor

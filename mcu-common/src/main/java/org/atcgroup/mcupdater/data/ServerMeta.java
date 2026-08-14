@@ -7,14 +7,20 @@ public final class ServerMeta {
     private final boolean hasCDNInfo;
     private final String cdnHost;
     private final int cdnPort;
+    private final String cdnRepository;
 
-    public ServerMeta(String serverBrand, String version, String sessionId, boolean hasCDNInfo, String cdnHost, int cdnPort) {
+    public ServerMeta(String serverBrand, String version, String sessionId, boolean hasCDNInfo, String cdnHost, int cdnPort, String cdnRepository) {
         this.serverBrand = serverBrand;
         this.serverVersion = version;
         this.sessionId = sessionId;
         this.hasCDNInfo = hasCDNInfo;
         this.cdnHost = cdnHost;
         this.cdnPort = cdnPort;
+        this.cdnRepository = cdnRepository;
+    }
+
+    public String getCdnRepository() {
+        return cdnRepository;
     }
 
     public String getSessionId() {

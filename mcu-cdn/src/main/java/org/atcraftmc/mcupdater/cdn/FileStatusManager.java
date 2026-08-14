@@ -5,9 +5,10 @@ import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.util.AsyncLock;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -81,15 +82,13 @@ public final class FileStatusManager {
     private void mergeFile(FileMergeInfo info) {
         this.addWriteLock(info.dest());
 
-        var buffer = new byte[131072];
-        var offset = 0;
-        var len = 0;
+        info.dest().getParentFile().mkdirs();
+        try {
+            info.dest().createNewFile();
 
-        try (var in = new FileInputStream(info.temp()); var out = new FileOutputStream(info.dest())) {
-            while ((len = in.read(buffer)) != 0) {
-                out.write(buffer, offset, len);
-                offset += len;
-            }
+            var i = Path.of(info.temp().toURI());
+            var o = Path.of(info.dest().toURI());
+            Files.copy(i, o, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -100,10 +99,12 @@ public final class FileStatusManager {
         if (!info.temp().delete()) {
             LOGGER.warn("Failed to delete temp file {}", info.temp().getName());
         }
+
+        MCUpdaterCDNServer.INSTANCE.getRepoChecksumManager(info.repo()).updateFileChecksum(info.dest().getName());
     }
 
-    public void queueFileMerge(File dest, File temp) {
-        var info = new FileMergeInfo(dest, temp);
+    public void queueFileMerge(String repo, File dest, File temp) {
+        var info = new FileMergeInfo(repo, dest, temp);
 
         if (this.isAvailableForWrite(dest)) {
             this.mergeFile(info);
@@ -128,6 +129,6 @@ public final class FileStatusManager {
         return !this.writeLocks.get(file.getAbsolutePath()).paused();
     }
 
-    record FileMergeInfo(File dest, File temp) {
+    record FileMergeInfo(String repo, File dest, File temp) {
     }
 }

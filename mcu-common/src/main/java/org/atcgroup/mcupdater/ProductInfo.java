@@ -1,7 +1,7 @@
 package org.atcgroup.mcupdater;
 
 public interface ProductInfo {
-    String VERSION = "2.0.32";
+    String VERSION = "3.0.10";
 
     static String logo(String artifact, String version) {
         return """

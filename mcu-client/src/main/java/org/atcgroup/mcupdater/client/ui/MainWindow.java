@@ -3,7 +3,6 @@ package org.atcgroup.mcupdater.client.ui;
 
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
 import org.atcgroup.mcupdater.client.ui.screen.Screen;
-import org.atcraftmc.updater.client.ClientBootstrap;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -25,8 +24,9 @@ public final class MainWindow {
         this.frame.setResizable(false);
         this.frame.setSize(960, 640);
         this.frame.setVisible(true);
-        this.frame.setTitle("MCUpdater 4.0.0 - " + ClientBootstrap.config().brand());
+        this.frame.setTitle("MCUpdater 4.0.0 - " + this.client.config().brand());
         this.frame.setIconImage(UI.image("/icon.png"));
+        this.frame.setLocationRelativeTo(null);
         this.frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -65,6 +65,10 @@ public final class MainWindow {
     public void setScreen(Screen screen) {
         this.frame.setContentPane(screen.$$$getRootComponent$$$());
         ((JPanel) this.frame.getContentPane()).updateUI();
+    }
+
+    public JFrame getHandle(){
+        return this.frame;
     }
 
     public void dispose() {

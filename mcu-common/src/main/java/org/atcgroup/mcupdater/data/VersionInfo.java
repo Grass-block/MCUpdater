@@ -31,9 +31,35 @@ public final class VersionInfo {
         this.version = dom.get("version").getAsString();
         this.timestamp = dom.get("timestamp").getAsLong();
         this.deleteFileList = dom.getAsJsonArray("remove").asList().stream().map(JsonElement::getAsString).collect(Collectors.toSet());
-        this.downloadPackList = dom.getAsJsonArray("resource_pack").asList().stream().map(JsonElement::getAsString).collect(Collectors.toSet());
+        this.downloadPackList = dom.getAsJsonArray("resource_pack")
+                .asList()
+                .stream()
+                .map(JsonElement::getAsString)
+                .collect(Collectors.toSet());
         this.updateFileList = new HashMap<>();//reserve
         this.downloadFileList = new HashMap<>();//reserve
+    }
+
+    public static VersionInfo ofMerged(List<VersionInfo> list) {
+        list.sort(Comparator.comparingLong(VersionInfo::getTimestamp));
+
+        var packs = new HashSet<String>();
+        var remove = new HashSet<String>();
+        var update = new HashMap<String, String>();
+        var download = new HashMap<String, String>();
+        var latest = list.get(list.size() - 1);
+
+        for (var v : list) {
+            remove.addAll(v.getDeleteFileList());
+            packs.addAll(v.getDownloadPackList());
+            update.putAll(v.getUpdateFileList());
+            download.putAll(v.getDownloadFileList());
+        }
+
+        remove.removeIf(String::isEmpty);
+        packs.removeIf(String::isEmpty);
+
+        return new VersionInfo(latest.channel, latest.timestamp, latest.version, remove, packs, update, download);
     }
 
     public JsonObject json() {
@@ -55,28 +81,6 @@ public final class VersionInfo {
         }
         dom.add("resource_pack", res);
         return dom;
-    }
-
-    public static VersionInfo ofMerged(List<VersionInfo> list) {
-        list.sort(Comparator.comparingLong(VersionInfo::getTimestamp));
-
-        var packs = new HashSet<String>();
-        var remove = new HashSet<String>();
-        var update = new HashMap<String, String>();
-        var download = new HashMap<String, String>();
-        var latest = list.get(list.size() - 1);
-
-        for (var v : list) {
-            packs.addAll(v.getDownloadPackList());
-            remove.addAll(v.getDeleteFileList());
-            update.putAll(v.getUpdateFileList());
-            download.putAll(v.getDownloadFileList());
-        }
-
-        remove.removeIf(String::isEmpty);
-        packs.removeIf(String::isEmpty);
-
-        return new VersionInfo(latest.channel,latest.timestamp, latest.version, packs, remove, update, download);
     }
 
     public long getTimestamp() {

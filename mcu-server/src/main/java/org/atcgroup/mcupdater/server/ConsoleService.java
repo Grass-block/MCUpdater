@@ -1,6 +1,8 @@
 package org.atcgroup.mcupdater.server;
 
 import org.atcgroup.mcupdater.ProductInfo;
+import org.atcgroup.mcupdater.server.service.CDNUploadService;
+import org.atcgroup.mcupdater.util.I18n;
 
 import java.util.Scanner;
 
@@ -10,7 +12,7 @@ public final class ConsoleService {
     private boolean running = true;
 
     public void stop() {
-        LOGGER.info("正在关闭控制台服务...");
+        LOGGER.info(I18n.message("console.stop"));
         this.running = false;
     }
 
@@ -20,13 +22,12 @@ public final class ConsoleService {
 
     public void run() {
         var scanner = new Scanner(System.in);
-        this.init();
         while (this.running) {
             var line = scanner.nextLine();
             if (line.isEmpty() || line.isBlank()) {
                 continue;
             }
-            LOGGER.info(">> {}", line);
+            LOGGER.info(I18n.message("console.input", line));
             this.handleCommand(line.split(" "));
         }
         scanner.close();
@@ -40,29 +41,34 @@ public final class ConsoleService {
     }
 
     public void help() {
-        LOGGER.info(" - stop: 停止服务器");
-        LOGGER.info(" - reload: 重新加载服务器配置");
-        LOGGER.info(" - help: 显示帮助信息");
-        LOGGER.info(" - build <频道> <版本>: 构建版本");
-        LOGGER.info(" - cdn-upload: 上传所有本地资源包");
+        LOGGER.info(I18n.message("console.help.stop"));
+        LOGGER.info(I18n.message("console.help.reload"));
+        LOGGER.info(I18n.message("console.help.help"));
+        LOGGER.info(I18n.message("console.help.build"));
+        LOGGER.info(I18n.message("console.help.cdn_upload"));
     }
 
     public void handleCommand(String[] input) {
+        var args = new String[input.length - 1];
+
+        System.arraycopy(input, 1, args, 0, args.length);
+
+
         switch (input[0]) {
             case "stop" -> MCUpdaterServer.instance().stop();
-           // case "build" -> server().buildVersion(input);
             case "help" -> {
-                LOGGER.info("==========[帮助信息]==========");
+                LOGGER.info(I18n.message("console.help.header"));
                 help();
             }
             case "reload" -> {
-                LOGGER.info("正在重新加载配置文件...");
+                LOGGER.info(I18n.message("console.reload"));
                 MCUpdaterServer.instance().loadConfiguration();
-                LOGGER.info("配置文件已经更新。网络服务需要重启才能应用修改。");
+                LOGGER.info(I18n.message("console.reload.complete"));
             }
-            case "cdn-upload" -> {
-                LOGGER.info("正在上传全部本地资源...");
-                //server().uploadPacks();
+            default -> {
+                if(!MCUpdaterServer.instance().getServiceManager().fireCommand(input[0],args)){
+                    LOGGER.info(I18n.message("console.unknown"));
+                }
             }
         }
     }

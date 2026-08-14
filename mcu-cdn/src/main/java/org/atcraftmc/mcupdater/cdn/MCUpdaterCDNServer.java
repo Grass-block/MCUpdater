@@ -10,15 +10,17 @@ import me.gb2022.commons.file.FilePath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.network.ErrorCatchHandler;
-import org.atcgroup.mcupdater.network.handler.FileServerHandler;
+import org.atcgroup.mcupdater.network.MCUProtocolV2;
 import org.atcgroup.mcupdater.network.handler.HeartBeatHandler;
-import org.atcraftmc.mcupdater.cdn.handler.CDNServerSideHandler;
+import org.atcgroup.mcupdater.util.FileChecksumManager;
+import org.atcraftmc.mcupdater.cdn.handler.CDNMainHandler;
 import org.atcraftmc.mcupdater.cdn.handler.CDNUploadReceiveHandler;
-import org.atcraftmc.updater.network.MCUProtocol;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public final class MCUpdaterCDNServer implements Runnable {
@@ -27,14 +29,21 @@ public final class MCUpdaterCDNServer implements Runnable {
     public static final Logger LOGGER = LogManager.getLogger("MCU-CDNServer");
     private final NioEventLoopGroup bossGroup = new NioEventLoopGroup();
     private final NioEventLoopGroup workerGroup = new NioEventLoopGroup();
-
     private final FileStatusManager fileManager = new FileStatusManager();
-
+    private final Map<String, FileChecksumManager> repoChecksumManagers = new HashMap<>();
 
     private final Properties props = new Properties();
 
     public static void main(String[] args) {
         new Thread(INSTANCE).start();
+    }
+
+    public FileChecksumManager getRepoChecksumManager(String repo) {
+        return this.repoChecksumManagers.computeIfAbsent(repo, (k) -> new FileChecksumManager(FilePath.RUNTIME.append(repo)));
+    }
+
+    public FileStatusManager getFileManager() {
+        return fileManager;
     }
 
     @Override
@@ -70,16 +79,14 @@ public final class MCUpdaterCDNServer implements Runnable {
             bootstrap.channel(NioServerSocketChannel.class);
             bootstrap.option(ChannelOption.SO_BACKLOG, 128);
             bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
-            bootstrap.handler(new LoggingHandler(LogLevel.INFO));
+            bootstrap.handler(new LoggingHandler(LogLevel.WARN));
 
-            var i = MCUProtocol.initializer();
+            var i = MCUProtocolV2.initializer();
 
             i.handler(HeartBeatHandler::new);
             i.handler(ErrorCatchHandler::new);
-            i.handler(CDNServerSideHandler::new);
-
             i.handler(() -> new CDNUploadReceiveHandler(this.fileManager));
-            i.handler(() -> new FileServerHandler(FilePath.RUNTIME));
+            i.handler(CDNMainHandler::new);
 
             bootstrap.childHandler(i);
 

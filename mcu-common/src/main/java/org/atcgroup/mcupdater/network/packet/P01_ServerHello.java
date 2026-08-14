@@ -21,8 +21,9 @@ public final class P01_ServerHello implements Packet {
         var hasCDNInfo = buffer.readBoolean();
         var cdnHost = BufferUtil.readString(buffer);
         var cdnPort = buffer.readInt();
+        var cdnRepo = BufferUtil.readString(buffer);
 
-        this.serverMeta = new ServerMeta(serverBrand, serverVersion, sessionId, hasCDNInfo, cdnHost, cdnPort);
+        this.serverMeta = new ServerMeta(serverBrand, serverVersion, sessionId, hasCDNInfo, cdnHost, cdnPort, cdnRepo);
     }
 
     @Override
@@ -33,5 +34,10 @@ public final class P01_ServerHello implements Packet {
         buffer.writeBoolean(this.serverMeta.hasCDNInfo());
         BufferUtil.writeString(buffer, this.serverMeta.getCdnHost());
         buffer.writeInt(this.serverMeta.getCdnPort());
+        BufferUtil.writeString(buffer, this.serverMeta.getCdnRepository());
+    }
+
+    public ServerMeta getServerMeta() {
+        return serverMeta;
     }
 }

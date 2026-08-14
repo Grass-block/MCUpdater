@@ -22,12 +22,16 @@ public interface DiffCheck {
                 buffer.clear();
             }
             return digest.digest();
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     static boolean compare(byte[] a1, byte[] a2) {
+        if (a1.length != a2.length) {
+            return false;
+        }
+
         for (int i = 0; i < 32; i++) {
             if (a1[i] != a2[i]) {
                 return false;
