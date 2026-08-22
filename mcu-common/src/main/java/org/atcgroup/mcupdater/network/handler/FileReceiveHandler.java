@@ -36,7 +36,14 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
     }
 
     @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("WTF?");
+    }
+
+    @Override
     public final void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
+        System.out.println(packet);
+
         if (packet instanceof P70_FTPHeader header) {
             if (!validateConnection(header.getUser(), header.getToken())) {
                 ctx.disconnect();

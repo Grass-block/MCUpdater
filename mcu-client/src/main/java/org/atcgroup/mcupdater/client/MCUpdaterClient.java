@@ -211,15 +211,14 @@ public final class MCUpdaterClient {
         this.info.save();
 
         if (this.targetVersionRecord.isEmpty() || this.targetVersionRecord.values().stream().allMatch(Set::isEmpty)) {
+            this.networkService.shutdown();
             this.dispose();
             NotificationService.getInstance().notify("客户端暂无更新", "客户端资源暂无变更，游戏即将启动 :D");
             Log.info("No changes happened, disposed client.");
             return;
         }
 
-        this.networkService.shutdown();
         this.lock.resume();
-
         NotificationService.getInstance().notify("客户端更新完成", "客户端资源更新完成，游戏即将启动 :D");
 
         Log.info("Successfully booted game thread, requesting update log from server.");
@@ -228,6 +227,7 @@ public final class MCUpdaterClient {
     }
 
     public void handleLogReceived(P22_UpdateLogs message) {
+        this.networkService.shutdown();
         this.window.setScreen(new UpdateLogScreen(message));
     }
 

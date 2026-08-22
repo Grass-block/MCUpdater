@@ -17,7 +17,7 @@ public final class CDNMainHandler extends PacketInboundHandler {
     protected void channelRead0(ChannelHandlerContext ctx, Packet packet) {
         if (packet instanceof P02_CDNHandShake message) {
             ctx.channel().pipeline().addLast(new CDNFileServerHandler(
-                    FilePath.RUNTIME.append(message.getRepo()),
+                    MCUpdaterCDNServer.FILE_PATH.append(message.getRepo()),
                     MCUpdaterCDNServer.INSTANCE.getFileManager()
             ));
             MCUProtocolV2.sendPacket(ctx, new P03_CDNHandShakeResponse());

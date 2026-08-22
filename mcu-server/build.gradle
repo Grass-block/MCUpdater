@@ -42,7 +42,7 @@ dependencies {
 
 jar{
     manifest{
-        attributes "Main-Class":"org.atcraftmc.updater.server.ServerBootstrap";
+        attributes "Main-Class":"org.atcgroup.mcupdater.server.Main";
     }
     archiveBaseName="mc-updater-server"
     duplicatesStrategy = DuplicatesStrategy.INCLUDE

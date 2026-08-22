@@ -2,17 +2,17 @@ plugins {
     id 'java'
 }
 
-apply from: "E:/Java/GradleScripts/build-base.gradle"
+apply from: "../gbuild.gradle"
 apply from: "../github-packages.gradle"
 
 group = 'org.atcraftmc'
 version = '1.0'
 
 applyGlobalScript("Publish/ProjectOutput.gradle")
-applyGlobalScript("Dependencies.gradle")
 
 repositories {
     mavenCentral()
+    papermcRepo()
 }
 
 dependencies {
@@ -21,6 +21,11 @@ dependencies {
     implementation 'io.netty:netty-codec:4.1.119.Final'
     implementation 'io.netty:netty-handler:4.1.119.Final'
     implementation 'io.netty:netty-transport:4.1.119.Final'
+
+    compileOnly 'com.velocitypowered:velocity-api:3.4.0-SNAPSHOT'
+    annotationProcessor 'com.velocitypowered:velocity-api:3.4.0-SNAPSHOT'
+    compileOnly "org.apache.logging.log4j:log4j-api:2.8.1"
+    implementation 'org.slf4j:log4j-over-slf4j:2.0.0-alpha1'
 
     implementation project(":mcu-common")
 }

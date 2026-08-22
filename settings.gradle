@@ -21,4 +21,5 @@ include 'mcu-client'
 include 'mcu-server'
 include 'mcu-common'
 include 'mcu-cdn'
+include 'mcu-cdn-velocity-loader'
 

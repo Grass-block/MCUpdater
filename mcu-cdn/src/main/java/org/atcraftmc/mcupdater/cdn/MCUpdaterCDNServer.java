@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Properties;
 
 public final class MCUpdaterCDNServer implements Runnable {
+    public static FilePath FILE_PATH = FilePath.RUNTIME;
+
     public static final MCUpdaterCDNServer INSTANCE = new MCUpdaterCDNServer();
 
     public static final Logger LOGGER = LogManager.getLogger("MCU-CDNServer");
@@ -39,7 +41,7 @@ public final class MCUpdaterCDNServer implements Runnable {
     }
 
     public FileChecksumManager getRepoChecksumManager(String repo) {
-        return this.repoChecksumManagers.computeIfAbsent(repo, (k) -> new FileChecksumManager(FilePath.RUNTIME.append(repo)));
+        return this.repoChecksumManagers.computeIfAbsent(repo, (k) -> new FileChecksumManager(FILE_PATH.append(repo)));
     }
 
     public FileStatusManager getFileManager() {
@@ -48,7 +50,7 @@ public final class MCUpdaterCDNServer implements Runnable {
 
     @Override
     public void run() {
-        var prop = new File(System.getProperty("user.dir") + File.separator + "config.properties");
+        var prop = FILE_PATH.append("config.properties").file();
 
         if (!prop.exists() || prop.length() == 0) {
             prop.getParentFile().mkdirs();

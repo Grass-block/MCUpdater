@@ -36,6 +36,7 @@ public final class ClientMainHandler extends PacketInboundHandler {
         }
 
         if (packet instanceof P22_UpdateLogs message) {
+            this.client.handleLogReceived(message);
             return;
         }
 

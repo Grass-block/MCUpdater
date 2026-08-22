@@ -5,8 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.network.handler.FileReceiveHandler;
 import org.atcgroup.mcupdater.network.packet.P70_FTPHeader;
-import org.atcgroup.mcupdater.util.FilePath;
 import org.atcraftmc.mcupdater.cdn.FileStatusManager;
+import org.atcraftmc.mcupdater.cdn.MCUpdaterCDNServer;
 
 import java.io.File;
 
@@ -32,7 +32,7 @@ public final class CDNUploadReceiveHandler extends FileReceiveHandler {
 
     @Override
     public File getFile(P70_FTPHeader header) {
-        return new File(FilePath.runtime() + "/" + header.getUser() + "/_cache/" + header.getFilename());
+        return MCUpdaterCDNServer.FILE_PATH.append(header.getUser()).append("_cache").append(header.getFilename()).file();
     }
 
     @Override
@@ -47,7 +47,7 @@ public final class CDNUploadReceiveHandler extends FileReceiveHandler {
 
     @Override
     public void onWriteComplete(String user, File file) {
-        var dest = new File(FilePath.runtime() + "/" + getCurrentUser() + "/" + file.getName());
+        var dest = MCUpdaterCDNServer.FILE_PATH.append(user).append(file.getName()).file();
         LOGGER.info("Completed file receive: {}", file.getName());
         this.fileManager.queueFileMerge(user, dest, file);
     }

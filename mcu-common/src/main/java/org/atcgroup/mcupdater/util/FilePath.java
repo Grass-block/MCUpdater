@@ -15,14 +15,6 @@ public interface FilePath {
         return runtime() + "/.updater";
     }
 
-    static String versions() {
-        return updater() + "/versions";
-    }
-
-    static String packs() {
-        return updater() + "/packs";
-    }
-
     static File config() {
         return new File(updater() + "/config.json");
     }
@@ -30,11 +22,6 @@ public interface FilePath {
     static String server() {
         return "http://" + SERVER.get();
     }
-
-    static String normalize(String path) {
-        return path.replace('\\', File.separatorChar).replace('/', File.separatorChar);
-    }
-
 
     static String resourcePackId(String channel, String uuid) {
         return channel + "_" + uuid;
