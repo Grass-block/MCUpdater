@@ -27,6 +27,21 @@ public interface DiffCheck {
         }
     }
 
+    static byte[] calculateSHA1(File file) {
+        try (var fis = new FileInputStream(file); var channel = fis.getChannel()) {
+            var digest = MessageDigest.getInstance("SHA-1");
+            var buffer = ByteBuffer.allocate(8192); // 8 KB buffer
+            while (channel.read(buffer) != -1) {
+                buffer.flip();
+                digest.update(buffer);
+                buffer.clear();
+            }
+            return digest.digest();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     static boolean compare(byte[] a1, byte[] a2) {
         if (a1.length != a2.length) {
             return false;

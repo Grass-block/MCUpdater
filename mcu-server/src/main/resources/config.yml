@@ -1,27 +1,60 @@
 config:
   server-address: 127.0.0.1 #服务器绑定的地址，一般不动
   server-port: 65321 #服务器网络端口
-  debug: false #开启后输出原始调试日志(Netty dump等等)，默认关闭
+  debug: false #是否输出调试内容, 若要反馈bug请打开此选项
   patch-slice-size: 32768 #发送更新数据包时的切片的大小(可选)
   rate-delay: 1 #响应网络时的速度限制(ms)
-  cdn-server: #CDN下载加速服务器设置
-    enable: true
-    address: 127.0.0.1 #目标cdn服务器的地址，客户端和服务端都会连接并上传下载文件。
+
+  #文件分析器
+  file-analyzer:
+    order: [ "modrinth","fallback" ] #分析器顺序，不需要的可以直接移出这个表
+    modrinth:
+      base-url: "api.modrinth.com/v2"
+      detect-ext-name: [ "zip","jar" ]
+    curseforge: #CF目前还没做完, 等吧
+      base-url: "example.com"
+      detect-ext-name: [ "zip","jar" ]
+      user-token: "YOUR_CF_API_TOKEN"
+    fallback:
+      compress-threshold: 268435456 #对大于一定大小的文件不再压缩以保证不必要的处理时间
+
+  #下载加速服务器设置
+  cdn-server:
+    enable: false
+    address: 111.231.101.124 #目标CDN服务器的地址，客户端和服务端都会连接并上传下载文件。
     port: 63000
-    access-token: token-4a08f #用于上传权限的token
-    repository: test-server #在CDN服务上，你的前置路径
+    access-token: cdn@vc_a2#test #用于上传权限的token
+    repository: test #在CDN服务上，你的前置路径
     upload-rate-delay: 1 #上传速度限制(ms/pps)
-  channels: #更新频道列表
+
+  #更新频道列表
+  channels:
     server: #更新频道的唯一ID 服务端目录建议直接修改path为你的Minecraft服务端路径即可
       required: true #是否强制安装，不填写默认为false
       name: 服务端资源(默认)
       desc: 默认的服务端核心玩法资源。
-      path: "E:/Java/Projects/MCUpdater/test/server/server"
-      filter-block: [] #优先于所有屏蔽器的强制屏蔽，选填
+      path: "E:/Java/Projects/MCUpdater/test/server/instance"
+      filter-block: [ ] #优先于所有屏蔽器的强制屏蔽，选填
       filter-reject: #拒绝的路径前缀
-        - "/"
+        - "/version/"
+        - "/plugins/"
+        - "/libraries/"
+        - "/configs/"
+        - "/config/"
+        - "/mohist-config/"
+        - "/banner-config/"
+        - "/youer-config/"
+        - "/bukkit.yml"
+        - "/spigot.yml"
+        - "/paper.yml"
+        - "/purpur.yml"
+        - "/server.properties"
+        - "/start.bat"
+        - "/start.sh"
+        - "/eula.txt"
+        - "/start.bat"
       filter-add: #允许的路径前缀，最后执行（优先级高于拒绝）
-        - "/mods" 
+        - "/mods"
     client-enforced: #预配的客户端资源，可以在这里快速配置你的客户端必装内容
       required: true
       name: 客户端资源(默认)
@@ -32,7 +65,7 @@ config:
       name: 客户端资源(选配)
       desc: 客户端的可选扩展资源。
       path: "E:/Java/Projects/MCUpdater/test/server/server-client"
-      filter-reject: ["/"]
+      filter-reject: [ "/" ]
       filter-add:
         - "/resourcepacks"
         - "/shaderpack"

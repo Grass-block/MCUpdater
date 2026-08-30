@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import me.gb2022.simpnet.packet.DeserializedConstructor;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.util.BufferUtil;
+import org.atcgroup.mcupdater.data.HttpDownloadInfo;
 import org.atcgroup.mcupdater.data.VersionSet;
 import org.atcgroup.mcupdater.util.FileChecksumManager;
 import org.atcgroup.mcupdater.data.DownloadFileList;
@@ -38,7 +39,7 @@ public final class P21_VersionHeaders implements Packet {
             var downloadPackList = new HashSet<String>();
             var deleteFileList = new HashSet<String>();
             var updateFileList = new HashMap<String, String>();
-            var downloadFileList = new HashMap<String, String>();
+            var downloadFileList = new HashSet<HttpDownloadInfo>();
 
             var deleteFileLen = buffer.readInt();
             for (var i = 0; i < deleteFileLen; i++) {
@@ -57,7 +58,12 @@ public final class P21_VersionHeaders implements Packet {
 
             var downloadFileLen = buffer.readInt();
             for (var i = 0; i < downloadFileLen; i++) {
-                downloadFileList.put(BufferUtil.readString(buffer), BufferUtil.readString(buffer));
+                var url = BufferUtil.readString(buffer);
+                var dest = BufferUtil.readString(buffer);
+                var size = buffer.readLong();
+                var sha512 = BufferUtil.readString(buffer);
+
+                downloadFileList.add(HttpDownloadInfo.of(url,dest,size,sha512));
             }
 
             var ver = new VersionInfo(channel, time, version, deleteFileList, downloadPackList, updateFileList, downloadFileList);
@@ -79,7 +85,7 @@ public final class P21_VersionHeaders implements Packet {
             var time = ver.getTimestamp();
             var version = ver.getVersion();
             var deleteFileList = ver.getDeleteFileList();
-            var downloadPackList = ver.getDownloadPackList();
+            var downloadPackList = ver.getResourcePackList();
             var updateFileList = ver.getUpdateFileList();
             var downloadFileList = ver.getDownloadFileList();
 
@@ -104,9 +110,11 @@ public final class P21_VersionHeaders implements Packet {
             }
 
             buffer.writeInt(downloadFileList.size());
-            for (var e : downloadFileList.entrySet()) {
-                BufferUtil.writeString(buffer, e.getKey());
-                BufferUtil.writeString(buffer, e.getValue());
+            for (var e : downloadFileList) {
+                BufferUtil.writeString(buffer, e.getUrl());
+                BufferUtil.writeString(buffer, e.getDest());
+                buffer.writeLong(e.getSize());
+                BufferUtil.writeString(buffer, e.getSha1());
             }
         }
 

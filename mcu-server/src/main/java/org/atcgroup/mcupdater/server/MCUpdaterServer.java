@@ -66,7 +66,6 @@ public final class MCUpdaterServer {
         }
 
         this.serviceManager.fireBootstrap(this.config());
-
         this.consoleService.start();
 
         var passed = System.currentTimeMillis() - last;

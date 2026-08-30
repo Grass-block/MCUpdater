@@ -3,13 +3,13 @@ package org.atcgroup.mcupdater.server.service;
 import com.google.gson.JsonParser;
 import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.packet.Packet;
-import org.atcgroup.mcupdater.PatchFile;
 import org.atcgroup.mcupdater.data.VersionInfo;
 import org.atcgroup.mcupdater.data.VersionSet;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
 import org.atcgroup.mcupdater.network.packet.*;
 import org.atcgroup.mcupdater.server.data.FileModifyStatus;
 import org.atcgroup.mcupdater.server.data.FileSource;
+import org.atcgroup.mcupdater.server.file.FileAddHandler;
 import org.atcgroup.mcupdater.util.FilePath;
 import org.atcgroup.mcupdater.util.I18n;
 import org.bukkit.configuration.ConfigurationSection;
@@ -29,6 +29,7 @@ public final class VersionService implements Service {
     @Override
     public void handleBootstrap(ConfigurationSection config) {
         LOGGER.info(I18n.message("version.source.loading"));
+        FileAddHandler.init(config.getConfigurationSection("file-analyzer"));
 
         var section = config.getConfigurationSection("channels");
 
@@ -37,7 +38,6 @@ public final class VersionService implements Service {
         }
 
         var ids = section.getKeys(false);
-
 
         for (var s : ids) {
             var source = new FileSource(s, section.getConfigurationSection(s));
@@ -68,7 +68,7 @@ public final class VersionService implements Service {
                     }
 
                     try (var in = new FileInputStream(f); var r = new InputStreamReader(in)) {
-                        addVersion(new VersionInfo(JsonParser.parseReader(r).getAsJsonObject()));
+                        addVersion(VersionInfo.fromJson(JsonParser.parseReader(r).getAsJsonObject()));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -146,8 +146,6 @@ public final class VersionService implements Service {
 
     public VersionInfo createInstall(String channel) {
         var paths = this.sources.get(channel).paths();
-        var zipFile = new File(FilePath.resourcePack(channel, "__install"));
-
         var files = new HashMap<String, File>();
 
         for (var path : paths) {
@@ -157,43 +155,36 @@ public final class VersionService implements Service {
 
         LOGGER.info(I18n.message("version.install.resource_pack"));
 
-        PatchFile.zip(zipFile, files);
+        var vi = new VersionInfo(channel, System.currentTimeMillis(), "__install", new HashSet<>(), new HashMap<>());
 
-        return new VersionInfo(
-                channel,
-                System.currentTimeMillis(),
-                "__install",
-                new HashSet<>(),
-                Set.of(zipFile.getName()),
-                new HashMap<>(),
-                new HashMap<>()
-        );
+        FileAddHandler.iterateFiles(files, vi);
+
+        return vi;
     }
+
 
     public VersionInfo install(String channel) {
         var latest = latest(channel);
         var install = channel(channel).get("__install");
 
         if (latest == null) {
-            return new VersionInfo(
-                    channel,
-                    install.getTimestamp(),
-                    "[initial]",
-                    install.getDeleteFileList(),
-                    install.getDownloadPackList(),
-                    install.getUpdateFileList(),
-                    install.getDownloadFileList()
+            return new VersionInfo(channel,
+                                   install.getTimestamp(),
+                                   "[initial]",
+                                   install.getDeleteFileList(),
+                                   install.getResourcePackList(),
+                                   install.getUpdateFileList(),
+                                   install.getDownloadFileList()
             );
         }
 
-        return new VersionInfo(
-                latest.getChannel(),
-                latest.getTimestamp(),
-                latest.getVersion(),
-                install.getDeleteFileList(),
-                install.getDownloadPackList(),
-                install.getUpdateFileList(),
-                install.getDownloadFileList()
+        return new VersionInfo(latest.getChannel(),
+                               latest.getTimestamp(),
+                               latest.getVersion(),
+                               install.getDeleteFileList(),
+                               install.getResourcePackList(),
+                               install.getUpdateFileList(),
+                               install.getDownloadFileList()
         );
     }
 
@@ -292,36 +283,19 @@ public final class VersionService implements Service {
             }
         }
 
-        var uuid = UUID.randomUUID().toString();
-        var zipFile = new File(FilePath.resourcePack(channel, uuid));
         var files = new HashMap<String, File>();
-
         for (var path : update) {
             var file = this.sources.get(channel).file(path);
             files.put(path, file);
         }
 
-        LOGGER.info("正在压缩 {} 个文件到资源包...", files.size());
-
-        PatchFile.zip(zipFile, files);
-
-        LOGGER.info("压缩包已创建: {}", zipFile.getAbsolutePath());
-
         var time = System.currentTimeMillis();
-        var vi = new VersionInfo(
-                channel,
-                time,
-                version,
-                remove,
-                Set.of(FilePath.resourcePackId(channel, uuid)),
-                new HashMap<>(),
-                new HashMap<>()
-        );
+        var vi = new VersionInfo(channel, time, version, remove, new HashMap<>());
+
+        FileAddHandler.iterateFiles(files, vi);
 
         this.registerVersion(vi);
-
         LOGGER.info("版本已创建: {}-{} 打包时间: {}", channel, version, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time));
-
     }
 
     @Override
@@ -337,10 +311,7 @@ public final class VersionService implements Service {
     @Override
     public void handleNetworkMessage(Packet packet, ChannelHandlerContext ctx) {
         if (packet instanceof P10_ChannelHeaderRequest) {
-            var data = this.sources.values()
-                    .stream()
-                    .map(FileSource::meta)
-                    .collect(Collectors.toSet());
+            var data = this.sources.values().stream().map(FileSource::meta).collect(Collectors.toSet());
 
             MCUProtocolV2.sendPacket(ctx, new P20_ChannelHeaders(data));
             return;
@@ -350,11 +321,8 @@ public final class VersionService implements Service {
             var sum = getService(ResourcePackService.class).getChecksumManager();
             var vs = new VersionSet();
 
-            var versions = request.getCurrentVersions()
-                    .entrySet()
-                    .stream()
-                    .map((e) -> this.from(e.getKey(), e.getValue(), vs))
-                    .collect(Collectors.toSet());
+            var versions = request.getCurrentVersions().entrySet().stream().map((e) -> this.from(e.getKey(), e.getValue(), vs)).collect(
+                    Collectors.toSet());
 
             versions.removeIf(Objects::isNull);
 

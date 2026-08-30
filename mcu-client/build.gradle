@@ -32,6 +32,10 @@ dependencies {
     implementation 'io.netty:netty-transport:4.1.119.Final'
 
     implementation gbuildLib('me.gb2022.simpnet:simpnet-base')
+
+
+    //convert to compile on publish.
+    implementation "org.apache.logging.log4j:log4j-core:2.8.1"
 }
 
 sourceCompatibility = '17'

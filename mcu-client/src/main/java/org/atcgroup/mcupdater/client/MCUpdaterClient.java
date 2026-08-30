@@ -172,7 +172,7 @@ public final class MCUpdaterClient {
 
         for (var v : this.targetVersions) {
             mergedDeletes.addAll(v.getDeleteFileList());
-            mergedExtracts.addAll(v.getDownloadPackList());
+            mergedExtracts.addAll(v.getResourcePackList());
         }
 
         var counter = 1;

@@ -34,7 +34,7 @@ public final class DownloadFileList extends HashMap<String, Map<String, byte[]>>
             var channel = v.getChannel();
             var files = this.computeIfAbsent(channel, k -> new HashMap<>());
 
-            for (var d : v.getDownloadPackList()) {
+            for (var d : v.getResourcePackList()) {
                 var sum = checksumManager.getFileChecksum(d);
                 files.put(d, sum);
             }

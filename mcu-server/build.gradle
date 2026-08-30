@@ -27,7 +27,7 @@ dependencies {
     implementation project(":mcu-common")
 
     // https://mvnrepository.com/artifact/io.netty/netty-all
-    implementation "org.apache.logging.log4j:log4j-core:2.8.1"
+
     implementation 'io.netty:netty-buffer:4.1.119.Final'
     implementation 'io.netty:netty-codec:4.1.119.Final'
     implementation 'io.netty:netty-handler:4.1.119.Final'

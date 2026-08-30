@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.logging.LoggingHandler;
 import me.gb2022.simpnet.packet.Packet;
 import org.atcgroup.mcupdater.client.ClientError;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
@@ -25,6 +26,7 @@ public final class ClientNetworkService {
         var group = new NioEventLoopGroup();
         var bs = new Bootstrap();
         var protocol = MCUProtocolV2.initializer()
+                .handler(LoggingHandler::new)
                 .handler(ClientFileReceiveHandler::new)
                 .handler(() -> new ClientMainHandler(this.client));
 
