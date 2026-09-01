@@ -1,7 +1,7 @@
 package org.atcgroup.mcupdater.client;
 
-import org.atcgroup.mcupdater.PatchFile;
-import org.atcgroup.mcupdater.client.network.CDNClient;
+import org.atcgroup.mcupdater.client.download.DownloadResolver;
+import org.atcgroup.mcupdater.client.download.DownloadResult;
 import org.atcgroup.mcupdater.client.network.ClientNetworkService;
 import org.atcgroup.mcupdater.client.ui.MainWindow;
 import org.atcgroup.mcupdater.client.ui.screen.*;
@@ -12,17 +12,19 @@ import org.atcgroup.mcupdater.data.VersionInfo;
 import org.atcgroup.mcupdater.data.VersionSet;
 import org.atcgroup.mcupdater.network.packet.*;
 import org.atcgroup.mcupdater.util.AsyncLock;
-import org.atcgroup.mcupdater.util.FilePath;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class MCUpdaterClient {
     public static final MCUpdaterClient INSTANCE = new MCUpdaterClient();
+    public static final ExecutorService BACKGROUND_EXEC = Executors.newFixedThreadPool(12);
+
 
     private final ClientInstallationInfo info = new ClientInstallationInfo();
     private final Config config = new Config();
@@ -30,9 +32,11 @@ public final class MCUpdaterClient {
     private final MainWindow window = new MainWindow(this);
     private final ProcessScreen processScreen = new ProcessScreen();
     private final AsyncLock lock = new AsyncLock();
+    private final DownloadResult downloadResult = new DownloadResult();
     private ServerMeta serverMeta;
     private Set<VersionInfo> targetVersions;
     private VersionSet targetVersionRecord;
+    private boolean isErrored = false;
 
     public static MCUpdaterClient instance() {
         return INSTANCE;
@@ -59,8 +63,8 @@ public final class MCUpdaterClient {
     public void startUpdate() {
         this.info.save();
         this.window.setScreen(this.processScreen);
-        this.processScreen.setTitle("正在更新信息");
-        this.processScreen.setUnsureProcess("正在等待服务器构建版本信息...");
+        this.processScreen.setUnsureProgress("准备中...");
+        this.processScreen.setUnsureProgress("正在下载资源变更");
         this.networkService.write(new P11_UpdateRequest(this.info.getLocalVersions()));
     }
 
@@ -77,6 +81,9 @@ public final class MCUpdaterClient {
 
     //client reaction
     public void handleConnected(P01_ServerHello message) {
+        if(this.isErrored) {
+            return;
+        }
         Log.info("server: " + message);
         this.serverMeta = message.getServerMeta();
 
@@ -85,8 +92,8 @@ public final class MCUpdaterClient {
             return;
         }
 
-        this.processScreen.setUnsureProcess("即将启动更新...");
-        this.processScreen.setUnsureProcess("若要修改配置，请在3s内按下 [K]; 若要跳过请按下 [Space]");
+        this.processScreen.setUnsureProgress("即将启动更新...");
+        this.processScreen.setUnsureProgress("若要修改配置，请在3s内按下 [K]; 若要跳过请按下 [Space]");
         this.window.setScreen(this.processScreen);
 
         var skip = new AtomicBoolean(false);
@@ -138,41 +145,33 @@ public final class MCUpdaterClient {
         this.startUpdate();
     }
 
+
     public void handleUpdaterHeaderReceived(P21_VersionHeaders headers) {
+        if(this.isErrored) {
+            return;
+        }
         this.targetVersions = headers.getVersions();
         this.targetVersionRecord = headers.getVersionSet();
 
-        this.processScreen.setUnsureProcess("准备中...");
-        this.processScreen.setUnsureProcess("正在下载资源变更");
-
         this.processScreen.setTitle("正在下载资源");
-
-        if (!this.serverMeta.hasCDNInfo()) {
-            this.processScreen.setUnsureProcess("正在初始化下载进程...");
-            this.networkService.write(new P30_FileDownloadRequest(headers.getFileList()));
-            return;
+        for (var resolver : DownloadResolver.RESOLVERS) {
+            resolver.resolve(headers, this.downloadResult);
         }
-
-        var addr = new InetSocketAddress(this.serverMeta.getCdnHost(), this.serverMeta.getCdnPort());
-
-        new CDNClient(this, addr, this.serverMeta.getCdnRepository(), headers.getFileList(), (f) -> {
-            if (f == null) {
-                this.handleException(ClientError.OTHER, new NullPointerException());
-            }
-            this.processScreen.setUnsureProcess("正在初始化下载进程...");
-            this.networkService.write(new P30_FileDownloadRequest(f));
-        }).run();
     }
 
     public void handleResourceDownloadComplete() {
-        this.processScreen.setUnsureProcess("正在更新本地资源...");
+        if(this.isErrored) {
+            return;
+        }
+        this.processScreen.setActive(false);
+        this.downloadResult.sync(this.processScreen);
+
+        this.processScreen.setUnsureProgress("正在更新本地资源...");
 
         var mergedDeletes = new ArrayList<String>();
-        var mergedExtracts = new ArrayList<String>();
 
         for (var v : this.targetVersions) {
             mergedDeletes.addAll(v.getDeleteFileList());
-            mergedExtracts.addAll(v.getResourcePackList());
         }
 
         var counter = 1;
@@ -180,30 +179,21 @@ public final class MCUpdaterClient {
             var a = mergedDeletes.size();
             var p = (int) (counter / (float) a * 100);
 
-            this.processScreen.setUnsureProcess("正在移除旧版文件 [%s/%s - %s%%] : %s".formatted(counter, a, p, s));
+            this.processScreen.setUnsureProgress("正在移除旧版文件 [%s/%s - %s%%] : %s".formatted(counter, a, p, s));
 
             counter++;
         }
 
-        counter = 1;
-        for (var s : mergedExtracts) {
-            var file = ClientFilePath.CACHE.append(s).file();
-            var a0 = mergedExtracts.size();
-
-            int finalCounter = counter;
-            PatchFile.unzip(file, FilePath.runtime(), (c, a) -> {
-                var p = (int) (c / (float) a * 100);
-                this.processScreen.setUnsureProcess("正在解压资源包 第(%s/%s个) [%s/%s - %s%%]".formatted(finalCounter, a0, c, a, p));
-            });
-
-            counter++;
-        }
+        this.downloadResult.complete(this.processScreen);
 
         Log.info("Update complete.");
         completeUpdate();
     }
 
     public void completeUpdate() {
+        if(this.isErrored) {
+            return;
+        }
         for (var v : this.targetVersions) {
             this.info.setTime(v.getChannel(), v.getTimestamp());
         }
@@ -222,16 +212,21 @@ public final class MCUpdaterClient {
         NotificationService.getInstance().notify("客户端更新完成", "客户端资源更新完成，游戏即将启动 :D");
 
         Log.info("Successfully booted game thread, requesting update log from server.");
-        Log.info("TODO: log viewing is in progress.");
         this.networkService.write(new P12_UpdateLogRequest(this.targetVersionRecord));
     }
 
     public void handleLogReceived(P22_UpdateLogs message) {
+        if(this.isErrored) {
+            return;
+        }
         this.networkService.shutdown();
         this.window.setScreen(new UpdateLogScreen(message));
     }
 
     public void handleConfigReceived(P20_ChannelHeaders message) {
+        if(this.isErrored) {
+            return;
+        }
         this.window.setScreen(new InstallConfigScreen(message.getMetas(), this::startUpdate));
     }
 
@@ -242,9 +237,12 @@ public final class MCUpdaterClient {
             default -> "发生了未知错误，请联系腐竹或服务器管理员。";
         };
 
+        this.isErrored = true;
+
         e.printStackTrace();
 
         this.window.setScreen(new ErrorScreen(error));
+        this.networkService.shutdown();
     }
 
 
@@ -266,5 +264,13 @@ public final class MCUpdaterClient {
 
     public Config config() {
         return this.config;
+    }
+
+    public ServerMeta getServerMeta() {
+        return this.serverMeta;
+    }
+
+    public ClientNetworkService getNetworkService() {
+        return this.networkService;
     }
 }

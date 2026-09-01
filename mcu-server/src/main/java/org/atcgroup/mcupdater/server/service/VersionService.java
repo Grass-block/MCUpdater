@@ -10,7 +10,7 @@ import org.atcgroup.mcupdater.network.packet.*;
 import org.atcgroup.mcupdater.server.data.FileModifyStatus;
 import org.atcgroup.mcupdater.server.data.FileSource;
 import org.atcgroup.mcupdater.server.file.FileAddHandler;
-import org.atcgroup.mcupdater.util.FilePath;
+import org.atcgroup.mcupdater.util.FilePaths;
 import org.atcgroup.mcupdater.util.I18n;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -55,7 +55,7 @@ public final class VersionService implements Service {
 
         for (var id : this.sources.keySet()) {
             var list = channel(id);
-            var folder = new File(FilePath.runtime() + "/versions/" + id);
+            var folder = new File(FilePaths.runtime() + "/versions/" + id);
 
             list.clear();
 
@@ -94,7 +94,7 @@ public final class VersionService implements Service {
 
     public void registerVersion(VersionInfo info) {
         this.addVersion(info);
-        var file = new File(FilePath.runtime() + "/versions/" + info.getChannel() + "/" + info.getVersion() + ".json");
+        var file = new File(FilePaths.runtime() + "/versions/" + info.getChannel() + "/" + info.getVersion() + ".json");
 
         if (file.getParentFile().mkdirs()) {
             LOGGER.info(I18n.message("version.directory_created", file.getParentFile().getAbsolutePath()));
@@ -110,7 +110,7 @@ public final class VersionService implements Service {
             return;
         }
 
-        var logFile = new File(FilePath.runtime() + "/versions/" + info.getChannel() + "/" + info.getVersion() + ".txt");
+        var logFile = new File(FilePaths.runtime() + "/versions/" + info.getChannel() + "/" + info.getVersion() + ".txt");
 
         logFile.getParentFile().mkdirs();
         try {
@@ -189,7 +189,7 @@ public final class VersionService implements Service {
     }
 
     public String log(String channel, String version) {
-        var file = new File(FilePath.runtime() + "/versions/" + channel + "/" + version + ".txt");
+        var file = new File(FilePaths.runtime() + "/versions/" + channel + "/" + version + ".txt");
 
         if (!file.exists() || file.length() == 0) {
             return "暂无更新信息 :(";

@@ -38,7 +38,7 @@ public final class ClientFileReceiveHandler extends FileReceiveHandler {
         var p = (int) ((double) received / (double) total * 100);
 
         MCUpdaterClient.INSTANCE.getProcessScreen().setProgress(p);
-        MCUpdaterClient.INSTANCE.getProcessScreen().setCommentMessage("正在下载资源文件: %s - %s%% (%s/%s MiB)".formatted(name, p, r, t));
+        MCUpdaterClient.INSTANCE.getProcessScreen().setTitle("正在下载资源文件: %s - %s%% (%s/%s MiB)".formatted(name, p, r, t));
     }
 
     @Override

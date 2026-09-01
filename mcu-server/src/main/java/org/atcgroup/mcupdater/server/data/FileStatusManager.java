@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.util.DiffCheck;
 import org.atcgroup.mcupdater.util.I18n;
-import org.atcgroup.mcupdater.util.FilePath;
+import org.atcgroup.mcupdater.util.FilePaths;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;
@@ -74,7 +74,7 @@ public final class FileStatusManager {
 
     public String shaFile(String path) {
         var sha = SHA.getSHA256(path, false);
-        return "%s/diff/%s/%s/%s.sha256".formatted(FilePath.runtime(), this.id, sha.substring(0, 2), sha);
+        return "%s/diff/%s/%s/%s.sha256".formatted(FilePaths.runtime(), this.id, sha.substring(0, 2), sha);
     }
 
     public String fixPath(File file) {
@@ -126,7 +126,7 @@ public final class FileStatusManager {
     }
 
     public Set<String> recordedFiles() {
-        var folder = new File("%s/diff/%s/".formatted(FilePath.runtime(), this.id));
+        var folder = new File("%s/diff/%s/".formatted(FilePaths.runtime(), this.id));
         var list = new HashSet<String>();
 
 

@@ -21,7 +21,7 @@ config:
   #下载加速服务器设置
   cdn-server:
     enable: false
-    address: 111.231.101.124 #目标CDN服务器的地址，客户端和服务端都会连接并上传下载文件。
+    address: cdn.example.com #目标CDN服务器的地址，客户端和服务端都会连接并上传下载文件。
     port: 63000
     access-token: cdn@vc_a2#test #用于上传权限的token
     repository: test #在CDN服务上，你的前置路径

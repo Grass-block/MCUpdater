@@ -4,7 +4,7 @@ import me.gb2022.commons.container.Vector;
 
 import java.io.File;
 
-public interface FilePath {
+public interface FilePaths {
     Vector<String> SERVER = new Vector<>("127.0.0.1:65320");
 
     static String runtime() {

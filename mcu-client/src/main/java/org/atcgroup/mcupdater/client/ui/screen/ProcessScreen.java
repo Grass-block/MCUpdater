@@ -1,8 +1,10 @@
 package org.atcgroup.mcupdater.client.ui.screen;
 
 
-import org.atcgroup.mcupdater.util.UpdateOperationListener;
+import org.atcgroup.mcupdater.client.ui.TaskListener;
+import org.atcgroup.mcupdater.client.ui.component.ExtraTaskCard;
 import org.atcgroup.mcupdater.client.ui.component.ImagePanel;
+import org.atcgroup.mcupdater.client.ui.component.SimpleJList;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,16 +17,70 @@ import java.util.Locale;
 import java.util.Objects;
 
 
-public final class ProcessScreen extends Screen implements UpdateOperationListener {
+public final class ProcessScreen extends Screen implements TaskListener {
     private JPanel root;
     private JProgressBar progress;
     private JLabel operation;
     private JPanel image;
     private JLabel title;
+    private JButton closeTabButton;
+    private JButton extraTaskTabButton;
+    private JPanel extraTaskTab;
+    private SimpleJList extraTaskList;
+    private boolean active = false;
 
     public ProcessScreen() {
         $$$setupUI$$$();
+        this.closeTab();
+
+        this.extraTaskTabButton.addActionListener(e -> openTab());
+        this.closeTabButton.addActionListener(e -> closeTab());
+    }
+
+    public void openTab() {
+        this.extraTaskTabButton.setVisible(false);
+        this.extraTaskTab.setVisible(true);
+        this.extraTaskTab.updateUI();
         this.root.updateUI();
+    }
+
+    public void closeTab() {
+        this.extraTaskTabButton.setVisible(true);
+        this.extraTaskTab.setVisible(false);
+        this.root.updateUI();
+    }
+
+    public ExtraTaskCard addTrackingTask() {
+        var card = new ExtraTaskCard();
+        this.extraTaskList.add(card.$$$getRootComponent$$$());
+        card.setParent(this);
+        return card;
+    }
+
+    public void removeTrackingTask(ExtraTaskCard card) {
+        this.extraTaskList.remove(card.$$$getRootComponent$$$());
+    }
+
+    @Override
+    public void setProgressTitle(String message) {
+        this.operation.setText(message);
+    }
+
+    @Override
+    public void setUnsureProgress(String message) {
+
+        SwingUtilities.invokeLater(() -> {
+            this.progress.setIndeterminate(true);
+            this.operation.setText(message);
+        });
+    }
+
+    @Override
+    public void setProgress(int prog) {
+        SwingUtilities.invokeLater(() -> {
+            this.progress.setIndeterminate(false);
+            this.progress.setValue(prog);
+        });
     }
 
     /**
@@ -38,7 +94,6 @@ public final class ProcessScreen extends Screen implements UpdateOperationListen
         createUIComponents();
         root = new JPanel();
         root.setLayout(new GridBagLayout());
-        root.setBackground(new Color(-13947600));
         root.setBorder(BorderFactory.createTitledBorder(
                 null,
                 "",
@@ -51,27 +106,16 @@ public final class ProcessScreen extends Screen implements UpdateOperationListen
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        root.add(spacer1, gbc);
-        final JPanel spacer2 = new JPanel();
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        root.add(spacer2, gbc);
-        final JPanel spacer3 = new JPanel();
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.fill = GridBagConstraints.VERTICAL;
-        root.add(spacer3, gbc);
+        root.add(spacer1, gbc);
         progress = new JProgressBar();
         progress.setIndeterminate(true);
         progress.setValue(100);
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
+        gbc.gridwidth = 3;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         root.add(progress, gbc);
@@ -80,50 +124,145 @@ public final class ProcessScreen extends Screen implements UpdateOperationListen
         if (titleFont != null) {
             title.setFont(titleFont);
         }
-        title.setForeground(new Color(-2104859));
         title.setText("正在更新您的客户端...");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.WEST;
         root.add(title, gbc);
-        operation = new JLabel();
-        operation.setForeground(new Color(-2104859));
-        operation.setText("正在连接到服务器...");
+        final JPanel spacer2 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 5;
-        gbc.anchor = GridBagConstraints.WEST;
-        root.add(operation, gbc);
-        final JPanel spacer4 = new JPanel();
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 6;
+        gbc.gridy = 7;
+        gbc.gridwidth = 3;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(5, 0, 0, 0);
-        root.add(spacer4, gbc);
-        final JPanel spacer5 = new JPanel();
+        root.add(spacer2, gbc);
+        final JPanel spacer3 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 5, 0);
-        root.add(spacer5, gbc);
+        root.add(spacer3, gbc);
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 3;
-        gbc.weighty = 1.0;
+        gbc.gridwidth = 5;
+        gbc.weighty = 0.3;
         gbc.fill = GridBagConstraints.BOTH;
         root.add(image, gbc);
+        final JPanel spacer4 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 4;
+        gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        root.add(spacer4, gbc);
+        operation = new JLabel();
+        operation.setForeground(new Color(-8881796));
+        operation.setText("正在连接到服务器...");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 6;
+        gbc.gridwidth = 3;
+        gbc.anchor = GridBagConstraints.WEST;
+        root.add(operation, gbc);
+        extraTaskTab = new JPanel();
+        extraTaskTab.setLayout(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 5;
+        gbc.weighty = 50.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        root.add(extraTaskTab, gbc);
+        final JPanel spacer5 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 4;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        extraTaskTab.add(spacer5, gbc);
         final JPanel spacer6 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        extraTaskTab.add(spacer6, gbc);
+        final JPanel spacer7 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 3;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        extraTaskTab.add(spacer7, gbc);
+        closeTabButton = new JButton();
+        closeTabButton.setText("收起");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 3;
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        extraTaskTab.add(closeTabButton, gbc);
+        final JLabel label1 = new JLabel();
+        Font label1Font = this.$$$getFont$$$(null, -1, 18, label1.getFont());
+        if (label1Font != null) {
+            label1.setFont(label1Font);
+        }
+        label1.setText("后台任务...");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        extraTaskTab.add(label1, gbc);
+        final JPanel spacer8 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        extraTaskTab.add(spacer8, gbc);
+        final JPanel panel1 = new JPanel();
+        panel1.setLayout(new BorderLayout(0, 0));
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = 3;
+        gbc.fill = GridBagConstraints.BOTH;
+        extraTaskTab.add(panel1, gbc);
+        final JScrollPane scrollPane1 = new JScrollPane();
+        panel1.add(scrollPane1, BorderLayout.CENTER);
+        extraTaskList = new SimpleJList();
+        extraTaskList.setEnabled(true);
+        scrollPane1.setViewportView(extraTaskList);
+        final JPanel spacer9 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        extraTaskTab.add(spacer9, gbc);
+        final JPanel spacer10 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        root.add(spacer10, gbc);
+        extraTaskTabButton = new JButton();
+        extraTaskTabButton.setText("后台任务...");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 3;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        root.add(extraTaskTabButton, gbc);
+        final JPanel spacer11 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
         gbc.gridy = 4;
+        gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        root.add(spacer6, gbc);
+        root.add(spacer11, gbc);
     }
 
     /**
@@ -161,26 +300,6 @@ public final class ProcessScreen extends Screen implements UpdateOperationListen
         return root;
     }
 
-    public void setUnsureProcess(String title) {
-        SwingUtilities.invokeLater(() -> {
-            this.progress.setIndeterminate(true);
-            this.operation.setText(title);
-        });
-    }
-
-    @Override
-    public void setProgress(int prog) {
-        SwingUtilities.invokeLater(() -> {
-            this.progress.setIndeterminate(false);
-            this.progress.setValue(prog);
-        });
-    }
-
-    @Override
-    public void setCommentMessage(String msg) {
-        this.operation.setText(msg);
-    }
-
     private void createUIComponents() {
         this.image = new ImagePanel();
         try {
@@ -194,5 +313,13 @@ public final class ProcessScreen extends Screen implements UpdateOperationListen
 
     public void setTitle(String title) {
         this.title.setText(title);
+    }
+
+    public void setActive(boolean v) {
+        this.active = v;
+    }
+
+    public boolean isActive() {
+        return this.active;
     }
 }

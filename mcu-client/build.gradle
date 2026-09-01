@@ -23,6 +23,8 @@ dependencies {
     implementation 'org.kordamp.ikonli:ikonli-swing:12.4.0'
     implementation 'org.kordamp.ikonli:ikonli-fontawesome6-pack:12.4.0'
 
+    implementation 'org.xhtmlrenderer:flying-saucer-core:9.9.5'
+
     implementation project(":mcu-common")
 
     // https://mvnrepository.com/artifact/io.netty/netty-all

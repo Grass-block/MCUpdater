@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.PatchFile;
 import org.atcgroup.mcupdater.data.VersionInfo;
-import org.atcgroup.mcupdater.util.FilePath;
+import org.atcgroup.mcupdater.util.FilePaths;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public final class PackCompressHandler implements FileAddHandler {
         } else {
             var source = Path.of(file.getAbsolutePath());
             var name = SHA.byteArrayToHexString(sha1);
-            var target = Path.of(FilePath.runtime() + "/packs/" + name);
+            var target = Path.of(FilePaths.runtime() + "/packs/" + name);
 
             info.addUpdateFile(relPath, name);
 
@@ -59,7 +59,7 @@ public final class PackCompressHandler implements FileAddHandler {
             LOGGER.info("No files found, compression discarded.");
         }
 
-        var file = FilePath.resourcePack(info.getChannel(), UUID.randomUUID().toString());
+        var file = FilePaths.resourcePack(info.getChannel(), UUID.randomUUID().toString());
         PatchFile.zip(new File(file), this.files);
     }
 }

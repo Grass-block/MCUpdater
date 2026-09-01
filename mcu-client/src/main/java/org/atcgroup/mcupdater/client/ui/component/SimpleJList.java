@@ -46,6 +46,11 @@ public final class SimpleJList extends JPanel {
         render();
     }
 
+    public void remove(JComponent component) {
+        this.cells.remove(component);
+        render();
+    }
+
     public void clear() {
         this.cells.clear();
         render();

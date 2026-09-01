@@ -39,7 +39,6 @@ public final class DownloadFileList extends HashMap<String, Map<String, byte[]>>
                 files.put(d, sum);
             }
 
-            //todo: std: file-resourceId order
             for (var d : v.getUpdateFileList().values()) {
                 files.put(d, checksumManager.getFileChecksum(d));
             }

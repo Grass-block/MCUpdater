@@ -41,11 +41,6 @@ public final class HttpDownloadInfo {
         return dest;
     }
 
-    public Runnable createDownloadTask() {
-        //todo
-        return null;
-    }
-
     public static Set<HttpDownloadInfo> fromJson(JsonArray ja) {
         var result = new HashSet<HttpDownloadInfo>();
         for (var e : ja) {

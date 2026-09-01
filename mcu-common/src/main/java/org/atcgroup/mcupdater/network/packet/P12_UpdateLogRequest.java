@@ -12,7 +12,6 @@ public final class P12_UpdateLogRequest implements Packet {
         this.versionSet = versionSet;
     }
 
-
     @DeserializedConstructor
     public P12_UpdateLogRequest(ByteBuf buffer) {
         this.versionSet = new VersionSet(buffer);
