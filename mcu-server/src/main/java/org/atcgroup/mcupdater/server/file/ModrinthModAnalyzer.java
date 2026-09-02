@@ -11,19 +11,24 @@ import org.atcgroup.mcupdater.data.VersionInfo;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 //ok啊小小测试一把
 //走你
 public final class ModrinthModAnalyzer implements FileAddHandler {
-    public static final Logger LOGGER = LogManager.getLogger("FileAnalyzer/Modrinth");
 
+    public static final Logger LOGGER = LogManager.getLogger("FileAnalyzer/Modrinth");
+    private final Map<String, HttpDownloadInfo> urlCache = new HashMap<>();
     private final List<String> matchExtensions;
     private final String url;
 
     public ModrinthModAnalyzer(ConfigurationSection dom) {
         this.matchExtensions = dom.getStringList("detect-ext-name");
-        this.url = dom.getString("url");
+        this.url = dom.getString("base-url");
     }
 
     static String getExtensionName(File file) {
@@ -43,6 +48,17 @@ public final class ModrinthModAnalyzer implements FileAddHandler {
             if (!file.getName().endsWith(".jar")) {
                 return false;
             }
+        }
+
+        if (this.urlCache.size() > 16384) {
+            this.urlCache.clear();
+        }
+
+        var key = new String(sha1, StandardCharsets.UTF_8);
+
+        if (this.urlCache.containsKey(key)) {
+            info.addExternalDownloadFile(this.urlCache.get(key));
+            return true;
         }
 
         var request = HttpRequest.https(HttpMethod.GET, this.url)
@@ -75,7 +91,10 @@ public final class ModrinthModAnalyzer implements FileAddHandler {
         var sha1_t = fileSect.getAsJsonObject("hashes").get("sha1").getAsString();
         var size = fileSect.get("size").getAsLong();
 
-        info.addExternalDownloadFile(HttpDownloadInfo.of(url, relPath, size, sha1_t));
+        var i = HttpDownloadInfo.of(url, relPath, size, sha1_t);
+
+        info.addExternalDownloadFile(i);
+        this.urlCache.put(key, i);
 
         return true;
     }

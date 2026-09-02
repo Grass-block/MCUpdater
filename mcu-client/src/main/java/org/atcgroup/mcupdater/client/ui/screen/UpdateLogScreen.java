@@ -181,6 +181,6 @@ public class UpdateLogScreen extends Screen {
     }
 
     private void createUIComponents() {
-        this.root = new ImagePanel(UI.image("/default-splash.png"));
+        this.root = new ImagePanel(UI.background());
     }
 }

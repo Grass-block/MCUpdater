@@ -137,6 +137,12 @@ public final class VersionInfo {
         }
         dom.add("resource_pack", res);
 
+        var update = new JsonObject();
+        for (var s : this.updateFileList.entrySet()) {
+            update.addProperty(s.getKey(), s.getValue());
+        }
+        dom.add("update", update);
+
         var download = new JsonArray();
         for (var d : this.downloadFileList) {
             download.add(d.json());

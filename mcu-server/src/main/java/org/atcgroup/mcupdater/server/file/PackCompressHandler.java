@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public final class PackCompressHandler implements FileAddHandler {
@@ -23,12 +24,21 @@ public final class PackCompressHandler implements FileAddHandler {
     private final long compressionThreshold;
 
     public PackCompressHandler(ConfigurationSection config) {
-        this.compressionThreshold = config.getLong("compression-threshold");
+        this.compressionThreshold = config.getInt("compress-threshold");
     }
 
     @Override
-    public void onStart(VersionInfo info) {
+    public void handleFiles(Set<SourceFileInfo> files, VersionInfo info) {
         this.files.clear();
+
+        FileAddHandler.super.handleFiles(files, info);
+
+        if (this.files.isEmpty()) {
+            LOGGER.info("No files found, compression discarded.");
+        }
+
+        var file = FilePaths.resourcePack(info.getChannel(), UUID.randomUUID().toString());
+        PatchFile.zip(new File(file), this.files);
     }
 
     @Override
@@ -37,13 +47,19 @@ public final class PackCompressHandler implements FileAddHandler {
             this.files.put(relPath, file);
             LOGGER.info("Compressing file: {}", relPath);
         } else {
-            var source = Path.of(file.getAbsolutePath());
+            var source = file.toPath();
             var name = SHA.byteArrayToHexString(sha1);
             var target = Path.of(FilePaths.runtime() + "/packs/" + name);
 
             info.addUpdateFile(relPath, name);
 
+            if(target.toFile().exists()) {
+                LOGGER.info("Skipping file: {}", SHA.byteArrayToHexString(sha1));
+                return true;
+            }
+
             try {
+                Files.createDirectories(target.getParent());
                 Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -51,15 +67,5 @@ public final class PackCompressHandler implements FileAddHandler {
         }
 
         return true;
-    }
-
-    @Override
-    public void onScanComplete(VersionInfo info) {
-        if (this.files.isEmpty()) {
-            LOGGER.info("No files found, compression discarded.");
-        }
-
-        var file = FilePaths.resourcePack(info.getChannel(), UUID.randomUUID().toString());
-        PatchFile.zip(new File(file), this.files);
     }
 }

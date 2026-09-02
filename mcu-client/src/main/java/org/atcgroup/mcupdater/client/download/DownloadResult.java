@@ -22,6 +22,8 @@ public final class DownloadResult {
     private final Set<String> filesToExtract = new HashSet<>();
     private final Map<String, String> filesToUpdate = new ConcurrentHashMap<>();
     private final Set<Future<?>> tasksToWait = new HashSet<>();
+    private int waitingCounter = 0;
+    private TaskListener listener =null;
 
     public void addExtractFile(String file) {
         this.filesToExtract.add(file);
@@ -35,18 +37,24 @@ public final class DownloadResult {
         this.tasksToWait.add(task);
     }
 
+    public void update(){
+        this.waitingCounter++;
+        var total = this.tasksToWait.size();
+
+        if(this.listener == null){
+            return;
+        }
+        if (!((ProcessScreen) this.listener).isActive()) {
+            this.listener.setProgress((int) ((float) this.waitingCounter / total * 100));
+            this.listener.setProgressTitle("正在等待下载任务完成(点击[后台任务]可查看): %s/%s".formatted(this.waitingCounter, total));
+        }
+    }
 
     public void sync(TaskListener listener) {
-        var total = this.tasksToWait.size();
-        var counter = 0;
+        this.listener = listener;
 
         for (var task : this.tasksToWait) {
-            counter++;
-
-            if (!((ProcessScreen) listener).isActive()) {
-                listener.setProgress((int) (float) (counter / total) * 100);
-                listener.setProgressTitle("正在等待下载任务完成(点击[后台任务]可查看): %s/%s".formatted(counter, total));
-            }
+            update();
 
             try {
                 task.get();

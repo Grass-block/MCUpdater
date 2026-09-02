@@ -7,12 +7,12 @@ config:
 
   #文件分析器
   file-analyzer:
-    order: [ "modrinth","fallback" ] #分析器顺序，不需要的可以直接移出这个表
+    order: [ "modrinth","curseforge","fallback" ] #分析器顺序，不需要的可以直接移出这个表
     modrinth:
       base-url: "api.modrinth.com/v2"
       detect-ext-name: [ "zip","jar" ]
-    curseforge: #CF目前还没做完, 等吧
-      base-url: "example.com"
+    curseforge:
+      base-url: "api.curseforge.com/v1"
       detect-ext-name: [ "zip","jar" ]
       user-token: "YOUR_CF_API_TOKEN"
     fallback:

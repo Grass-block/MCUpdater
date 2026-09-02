@@ -2,6 +2,7 @@ package org.atcgroup.mcupdater.client.ui.screen;
 
 
 import org.atcgroup.mcupdater.client.ui.TaskListener;
+import org.atcgroup.mcupdater.client.ui.UI;
 import org.atcgroup.mcupdater.client.ui.component.ExtraTaskCard;
 import org.atcgroup.mcupdater.client.ui.component.ImagePanel;
 import org.atcgroup.mcupdater.client.ui.component.SimpleJList;
@@ -302,13 +303,7 @@ public final class ProcessScreen extends Screen implements TaskListener {
 
     private void createUIComponents() {
         this.image = new ImagePanel();
-        try {
-            var res = Objects.requireNonNull(this.getClass().getResourceAsStream("/default-splash.png"));
-            var image = ImageIO.read(res);
-            ((ImagePanel) this.image).paintImage(image);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ((ImagePanel) this.image).paintImage(UI.background());
     }
 
     public void setTitle(String title) {

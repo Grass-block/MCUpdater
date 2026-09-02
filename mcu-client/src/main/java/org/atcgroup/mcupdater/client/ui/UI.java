@@ -1,11 +1,13 @@
 package org.atcgroup.mcupdater.client.ui;
 
+import org.atcgroup.mcupdater.client.ClientFilePath;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.swing.FontIcon;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -24,6 +26,16 @@ public interface UI {
     }
 
     static Image image(String path) {
+        var file = ClientFilePath.UPDATER.append(path).file();
+
+        if (file.exists() && file.length() > 0) {
+            try (var res = new FileInputStream(file)) {
+                return ImageIO.read(res);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         try (var res = UI.class.getResourceAsStream(path)) {
             if (res != null) {
                 return ImageIO.read(res);
@@ -45,6 +57,6 @@ public interface UI {
     }
 
     static Image background() {
-        return image("/default-splash.png");
+        return image("/background.png");
     }
 }

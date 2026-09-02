@@ -4,7 +4,6 @@ import me.gb2022.commons.math.SHA;
 import org.atcgroup.mcupdater.client.ClientError;
 import org.atcgroup.mcupdater.client.ClientFilePath;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
-import org.atcgroup.mcupdater.client.ui.TaskListener;
 import org.atcgroup.mcupdater.client.ui.component.ExtraTaskCard;
 import org.atcgroup.mcupdater.data.HttpDownloadInfo;
 import org.atcgroup.mcupdater.network.packet.P21_VersionHeaders;
@@ -87,11 +86,15 @@ public final class ExternDownloadResolver implements DownloadResolver {
                 task.setProgressTitle("正在下载文件: %s (%s/%sKiB)".formatted(info.getUrl(), downloaded / 1024, total / 1024));
                 task.setProgress((int) ((float) downloaded / total * 100));
             }
+        } catch (Exception e) {
+            download(info, result);
         }
 
         if (!SHA.byteArrayToHexString(DiffCheck.calculateSHA1(file)).equals(info.getSha1())) {
             download(info, result);
         }
+
+        client.getDownloadResult().update();
 
         result.addUpdateFile(info.getDest(), name);
         Objects.requireNonNull(task).close();

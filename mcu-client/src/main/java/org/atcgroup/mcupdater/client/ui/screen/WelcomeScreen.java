@@ -16,16 +16,18 @@ public final class WelcomeScreen extends Screen {
     private JButton startButton;
     private JButton extraButton;
     private JLabel clientName;
+    private ImagePanel background;
 
     private void createUIComponents() {
-        this.clientIcon = new ImagePanel();
-        this.clientIcon.paintImage(UI.image("/icon.png"));
+
     }
 
     public WelcomeScreen(Runnable next) {
         $$$setupUI$$$();
         this.clientName.setText(MCUpdaterClient.instance().config().brand());
         this.startButton.addActionListener(e -> next.run());
+        this.background.paintImage(UI.background());
+        this.clientIcon.paintImage(UI.image("/icon.png"));
     }
 
     /**
@@ -36,23 +38,23 @@ public final class WelcomeScreen extends Screen {
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
-        createUIComponents();
         root = new JPanel();
         root.setLayout(new BorderLayout(0, 0));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
         panel1.setEnabled(true);
         panel1.setMaximumSize(new Dimension(200, 200));
-        root.add(panel1, BorderLayout.CENTER);
+        root.add(panel1, BorderLayout.WEST);
+        clientIcon = new ImagePanel();
         clientIcon.setMaximumSize(new Dimension(140, 140));
         clientIcon.setMinimumSize(new Dimension(140, 140));
-        clientIcon.setPreferredSize(new Dimension(140, 140));
+        clientIcon.setPreferredSize(new Dimension(120, 120));
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.insets = new Insets(0, 0, 16, 0);
+        gbc.insets = new Insets(0, 70, 5, 70);
         panel1.add(clientIcon, gbc);
         clientName = new JLabel();
         Font clientNameFont = this.$$$getFont$$$(null, -1, 26, clientName.getFont());
@@ -87,6 +89,8 @@ public final class WelcomeScreen extends Screen {
         gbc.gridy = 3;
         gbc.insets = new Insets(0, 0, 30, 0);
         panel1.add(extraButton, gbc);
+        background = new ImagePanel();
+        root.add(background, BorderLayout.CENTER);
     }
 
     /**

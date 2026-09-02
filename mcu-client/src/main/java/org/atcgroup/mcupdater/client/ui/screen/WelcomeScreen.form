@@ -8,26 +8,26 @@
     <border type="none"/>
     <children>
       <grid id="c445b" layout-manager="GridBagLayout">
-        <constraints border-constraint="Center"/>
+        <constraints border-constraint="West"/>
         <properties>
           <enabled value="true"/>
           <maximumSize width="200" height="200"/>
         </properties>
         <border type="none"/>
         <children>
-          <component id="8aeb1" class="org.atcgroup.mcupdater.client.ui.component.ImagePanel" binding="clientIcon" custom-create="true">
+          <component id="8aeb1" class="org.atcgroup.mcupdater.client.ui.component.ImagePanel" binding="clientIcon">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="2" indent="0" use-parent-layout="false">
                 <minimum-size width="256" height="256"/>
                 <preferred-size width="256" height="256"/>
                 <maximum-size width="256" height="256"/>
               </grid>
-              <gridbag top="0" left="0" bottom="16" right="0" weightx="0.0" weighty="0.0"/>
+              <gridbag top="0" left="70" bottom="5" right="70" weightx="0.0" weighty="0.0"/>
             </constraints>
             <properties>
               <maximumSize width="140" height="140"/>
               <minimumSize width="140" height="140"/>
-              <preferredSize width="140" height="140"/>
+              <preferredSize width="120" height="120"/>
             </properties>
           </component>
           <component id="2b3ad" class="javax.swing.JLabel" binding="clientName">
@@ -67,6 +67,10 @@
           </component>
         </children>
       </grid>
+      <component id="ab473" class="org.atcgroup.mcupdater.client.ui.component.ImagePanel" binding="background">
+        <constraints border-constraint="Center"/>
+        <properties/>
+      </component>
     </children>
   </grid>
 </form>

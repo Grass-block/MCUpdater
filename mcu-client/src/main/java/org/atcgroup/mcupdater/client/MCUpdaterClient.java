@@ -25,7 +25,6 @@ public final class MCUpdaterClient {
     public static final MCUpdaterClient INSTANCE = new MCUpdaterClient();
     public static final ExecutorService BACKGROUND_EXEC = Executors.newFixedThreadPool(12);
 
-
     private final ClientInstallationInfo info = new ClientInstallationInfo();
     private final Config config = new Config();
     private final ClientNetworkService networkService = new ClientNetworkService(this);
@@ -44,13 +43,14 @@ public final class MCUpdaterClient {
 
     //client action
     public void run() {
-        this.window.init();
-        this.window.setScreen(new StartScreen());
-
         if (!this.config.load()) {
+            this.window.init();
             this.handleException(ClientError.CONFIG, new RuntimeException());
             return;
         }
+
+        this.window.init();
+        this.window.setScreen(new StartScreen());
 
         this.info.load();
         this.networkService.run(this.config.service());
@@ -88,7 +88,11 @@ public final class MCUpdaterClient {
         this.serverMeta = message.getServerMeta();
 
         if (this.info.isInvalid()) {
-            this.window.setScreen(new WelcomeScreen(this::requestConfig));
+            try {
+                this.window.setScreen(new WelcomeScreen(this::requestConfig));
+            }catch (Throwable e){
+                e.printStackTrace();
+            }
             return;
         }
 
@@ -272,5 +276,9 @@ public final class MCUpdaterClient {
 
     public ClientNetworkService getNetworkService() {
         return this.networkService;
+    }
+
+    public DownloadResult getDownloadResult() {
+        return downloadResult;
     }
 }
