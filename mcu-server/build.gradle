@@ -32,7 +32,7 @@ dependencies {
     implementation 'io.netty:netty-codec:4.1.119.Final'
     implementation 'io.netty:netty-handler:4.1.119.Final'
     implementation 'io.netty:netty-transport:4.1.119.Final'
-    implementation projectLocal("bukkit-configuration")
+    implementation projectLib("bukkit-configuration")
 
     implementation gbuildLib('me.gb2022.simpnet:simpnet-base')
     implementation("org.yaml:snakeyaml:1.19")
