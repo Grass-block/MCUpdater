@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.server.file;
+package org.atcgroup.mcupdater.server.analyzer;
 
 import me.gb2022.commons.math.SHA;
 import org.apache.logging.log4j.LogManager;
@@ -15,10 +15,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
-public final class PackCompressHandler implements FileAddHandler {
+public final class PackCompressHandler implements VersionFileAnalyzer {
     public static final Logger LOGGER = LogManager.getLogger("FileAnalyzer/Fallback");
     private final Map<String, File> files = new HashMap<>();
     private final long compressionThreshold;
@@ -31,14 +31,16 @@ public final class PackCompressHandler implements FileAddHandler {
     public void handleFiles(Set<SourceFileInfo> files, VersionInfo info) {
         this.files.clear();
 
-        FileAddHandler.super.handleFiles(files, info);
+        VersionFileAnalyzer.super.handleFiles(files, info);
 
         if (this.files.isEmpty()) {
             LOGGER.info("No files found, compression discarded.");
         }
 
-        var file = FilePaths.resourcePack(info.getChannel(), UUID.randomUUID().toString());
+        var file = FilePaths.resourcePack(info.getChannel(), Objects.equals(info.getVersion(), "__install") ? "__install" : String.valueOf(info.getTimestamp()));
         PatchFile.zip(new File(file), this.files);
+
+        info.getResourcePackList().add(new File(file).getName());
     }
 
     @Override
@@ -51,9 +53,9 @@ public final class PackCompressHandler implements FileAddHandler {
             var name = SHA.byteArrayToHexString(sha1);
             var target = Path.of(FilePaths.runtime() + "/packs/" + name);
 
-            info.addUpdateFile(relPath, name);
+            info.addUpdateFile(name, relPath);
 
-            if(target.toFile().exists()) {
+            if (target.toFile().exists()) {
                 LOGGER.info("Skipping file: {}", SHA.byteArrayToHexString(sha1));
                 return true;
             }

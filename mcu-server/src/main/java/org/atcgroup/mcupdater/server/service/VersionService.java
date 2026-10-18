@@ -3,15 +3,24 @@ package org.atcgroup.mcupdater.server.service;
 import com.google.gson.JsonParser;
 import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.packet.Packet;
+import org.atcgroup.mcupdater.CompiledVersionData;
+import org.atcgroup.mcupdater.FileRepository;
+import org.atcgroup.mcupdater.UpdateHeader;
 import org.atcgroup.mcupdater.data.VersionInfo;
-import org.atcgroup.mcupdater.data.VersionSet;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
 import org.atcgroup.mcupdater.network.packet.*;
-import org.atcgroup.mcupdater.server.data.FileModifyStatus;
-import org.atcgroup.mcupdater.server.data.FileSource;
-import org.atcgroup.mcupdater.server.file.FileAddHandler;
+import org.atcgroup.mcupdater.server.MCUpdaterServer;
+import org.atcgroup.mcupdater.server.VersionPostCompileHandler;
+import org.atcgroup.mcupdater.server.analyzer.CurseForgeModAnalyzer;
+import org.atcgroup.mcupdater.server.analyzer.ModrinthModAnalyzer;
+import org.atcgroup.mcupdater.server.analyzer.PackCompressHandler;
+import org.atcgroup.mcupdater.server.analyzer.VersionFileAnalyzer;
+import org.atcgroup.mcupdater.server.file.FileModifyStatus;
+import org.atcgroup.mcupdater.server.file.FileSource;
+import org.atcgroup.mcupdater.util.DiffCheck;
 import org.atcgroup.mcupdater.util.FilePaths;
 import org.atcgroup.mcupdater.util.I18n;
+import org.atcgroup.mcupdater.util.Pipeline;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.*;
@@ -26,11 +35,23 @@ public final class VersionService implements Service {
     private final Map<String, FileSource> sources = new HashMap<>();
     private final Map<String, Map<String, VersionInfo>> versions = new HashMap<>();
 
-    @Override
-    public void handleBootstrap(ConfigurationSection config) {
-        LOGGER.info(I18n.message("version.source.loading"));
-        FileAddHandler.init(config.getConfigurationSection("file-analyzer"));
+    private final Pipeline<VersionPostCompileHandler> compiledVersionHandlerPipeline = new Pipeline<>();
+    private final Pipeline<VersionFileAnalyzer> fileAnalyzerPipeline = new Pipeline<>();
 
+    private final FileRepository resourceRepository;
+
+    public VersionService(FileRepository resourceRepository) {
+        this.resourceRepository = resourceRepository;
+    }
+
+    @Override
+    public void handleServerBootstrap(MCUpdaterServer server, ConfigurationSection config) {
+        LOGGER.info(I18n.message("version.source.loading"));
+        initAnalyzers(config.getConfigurationSection("file-analyzer"));
+        loadVersions(config);
+    }
+
+    private void loadVersions(ConfigurationSection config) {
         var section = config.getConfigurationSection("channels");
 
         if (section == null) {
@@ -54,7 +75,7 @@ public final class VersionService implements Service {
         this.versions.clear();
 
         for (var id : this.sources.keySet()) {
-            var list = channel(id);
+            var list = getVersionsByChannel(id);
             var folder = new File(FilePaths.runtime() + "/versions/" + id);
 
             list.clear();
@@ -77,118 +98,57 @@ public final class VersionService implements Service {
 
             LOGGER.info(I18n.message("version.source.versions_loaded", id, list.size()));
 
-            if (!channel(id).containsKey("__install")) {
+            if (!getVersionsByChannel(id).containsKey("__install")) {
                 LOGGER.info(I18n.message("version.install.generating", id));
-                registerVersion(createInstall(id));
+                registerVersion(buildInstallVersion(id));
             }
         }
     }
 
-    public void addVersion(VersionInfo info) {
-        this.channel(info.getChannel()).put(info.getVersion(), info);
+    private void initAnalyzers(ConfigurationSection config) {
+        for (var id : config.getStringList("order")) {
+            var dom = config.getConfigurationSection(id);
+
+            this.fileAnalyzerPipeline.addLast(id, switch (id) {
+                case "modrinth" -> new ModrinthModAnalyzer(dom);
+                case "fallback" -> new PackCompressHandler(dom);
+                case "curseforge" -> new CurseForgeModAnalyzer(dom);
+                default -> throw new IllegalStateException("Unexpected FileAnalyzer ID: " + id);
+            });
+        }
     }
 
-    public Map<String, VersionInfo> channel(String channel) {
+
+    public Pipeline<VersionFileAnalyzer> getFileAnalyzerPipeline() {
+        return fileAnalyzerPipeline;
+    }
+
+    public Pipeline<VersionPostCompileHandler> getCompiledVersionHandlerPipeline() {
+        return compiledVersionHandlerPipeline;
+    }
+
+
+    public void addVersion(VersionInfo info) {
+        this.getVersionsByChannel(info.getChannel()).put(info.getVersion(), info);
+    }
+
+    public Map<String, VersionInfo> getVersionsByChannel(String channel) {
         return this.versions.computeIfAbsent(channel, k -> new HashMap<>());
     }
 
-    public void registerVersion(VersionInfo info) {
-        this.addVersion(info);
-        var file = new File(FilePaths.runtime() + "/versions/" + info.getChannel() + "/" + info.getVersion() + ".json");
-
-        if (file.getParentFile().mkdirs()) {
-            LOGGER.info(I18n.message("version.directory_created", file.getParentFile().getAbsolutePath()));
-        }
-
-        try (var o = new FileOutputStream(file)) {
-            o.write(info.json().toString().getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        if (Objects.equals(info.getVersion(), "__install")) {
-            return;
-        }
-
-        var logFile = new File(FilePaths.runtime() + "/versions/" + info.getChannel() + "/" + info.getVersion() + ".txt");
-
-        logFile.getParentFile().mkdirs();
-        try {
-            logFile.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        LOGGER.info(I18n.message("version.install.updating"));
-
-        registerVersion(createInstall(info.getChannel()));
-
-        LOGGER.info(I18n.message("version.registered", info.getChannel(), info.getVersion(), logFile.getAbsolutePath()));
+    public Map<String, FileSource> getSources() {
+        return this.sources;
     }
 
     public List<VersionInfo> sorted(String channel) {
-        return channel(channel).values()
+        return getVersionsByChannel(channel).values()
                 .stream()
                 .filter((v) -> !Objects.equals(v.getVersion(), "__install"))
                 .sorted(Comparator.comparingLong(VersionInfo::getTimestamp))
                 .collect(Collectors.toList());
     }
 
-    public VersionInfo latest(String channel) {
-        var data = sorted(channel);
-
-        if (data.isEmpty()) {
-            return null;
-        }
-
-        return data.get(data.size() - 1);
-    }
-
-    public VersionInfo createInstall(String channel) {
-        var paths = this.sources.get(channel).paths();
-        var files = new HashMap<String, File>();
-
-        for (var path : paths) {
-            var file = this.sources.get(channel).file(path);
-            files.put(path, file);
-        }
-
-        LOGGER.info(I18n.message("version.install.resource_pack"));
-
-        var vi = new VersionInfo(channel, System.currentTimeMillis(), "__install", new HashSet<>(), new HashMap<>());
-
-        FileAddHandler.iterateFiles(files, vi);
-
-        return vi;
-    }
-
-
-    public VersionInfo install(String channel) {
-        var latest = latest(channel);
-        var install = channel(channel).get("__install");
-
-        if (latest == null) {
-            return new VersionInfo(channel,
-                                   install.getTimestamp(),
-                                   "[initial]",
-                                   install.getDeleteFileList(),
-                                   install.getResourcePackList(),
-                                   install.getUpdateFileList(),
-                                   install.getDownloadFileList()
-            );
-        }
-
-        return new VersionInfo(latest.getChannel(),
-                               latest.getTimestamp(),
-                               latest.getVersion(),
-                               install.getDeleteFileList(),
-                               install.getResourcePackList(),
-                               install.getUpdateFileList(),
-                               install.getDownloadFileList()
-        );
-    }
-
-    public String log(String channel, String version) {
+    public String getVersionLog(String channel, String version) {
         var file = new File(FilePaths.runtime() + "/versions/" + channel + "/" + version + ".txt");
 
         if (!file.exists() || file.length() == 0) {
@@ -202,41 +162,71 @@ public final class VersionService implements Service {
         }
     }
 
-    public VersionInfo from(String channel, long timestamp, VersionSet container) {
+    public List<VersionInfo> from(String channel, long timestamp) {
         var data = sorted(channel);
-        var install = install(channel);
+        var install = createInstallVersion(channel);
+        var container = new ArrayList<VersionInfo>();
 
         if (data.isEmpty()) {
             if (timestamp < install.getTimestamp()) {
-                container.addVersion(install.getChannel(), install.getVersion());
-                return install;
+                container.add(install);
+                return container;
             }
 
-            return null;
+            return container;
         }
 
-        if (data.get(0).getTimestamp() > timestamp) {
-            container.addVersion(install.getChannel(), install.getVersion());
-            return install;
+        if (data.getFirst().getTimestamp() > timestamp) {
+            container.add(install);
+            return container;
         }
 
         data.removeIf((v) -> v.getTimestamp() <= timestamp);
 
         if (data.isEmpty()) {
-            return null;
+            return container;
         }
 
-        for (var v : data) {
-            container.addVersion(v.getChannel(), v.getVersion());
-        }
-        return VersionInfo.ofMerged(data);
+        container.addAll(data);
+
+        return container;
     }
 
-    public List<VersionInfo> all() {
-        var result = new ArrayList<VersionInfo>();
+    public UpdateHeader compile(Map<String, Long> currentVersions) {
+        var result = new UpdateHeader();
 
-        for (var map : this.versions.values()) {
-            result.addAll(map.values());
+        for (var cv : currentVersions.entrySet()) {
+            var versions = from(cv.getKey(), cv.getValue());
+            var composed = composeVersionData(versions);
+
+            if (composed != null) {
+                result.addVersionData(composed);
+            }
+
+            for (var v : versions) {
+                result.getDeleteFiles().addAll(v.getDeleteFileList());
+                result.getExpandFiles().addAll(v.getResourcePackList());
+                result.getReplaceFiles().putAll(v.getUpdateFileList());
+
+                result.getExternDownloads().addAll(v.getDownloadFileList());
+                for (var f : v.getResourcePackList()) {
+                    var sha = this.resourceRepository.getFileInfo(f).getSha256();
+                    result.addServerDownload(f, sha);
+                }
+                for (var f : v.getUpdateFileList().keySet()) {
+                    var fi = this.resourceRepository.getFileInfo(f);
+
+                    if (fi == null) {
+                        continue;
+                    }
+
+                    result.addServerDownload(f, fi.getSha256());
+                }
+            }
+        }
+
+        for (var handler : this.compiledVersionHandlerPipeline.list()) {
+            handler.handle(result, this.resourceRepository);
         }
 
         return result;
@@ -248,7 +238,7 @@ public final class VersionService implements Service {
             return;
         }
 
-        if (this.channel(channel).containsKey(version)) {
+        if (this.getVersionsByChannel(channel).containsKey(version)) {
             LOGGER.error("版本号 {} 已经存在。", version);
             return;
         }
@@ -292,11 +282,134 @@ public final class VersionService implements Service {
         var time = System.currentTimeMillis();
         var vi = new VersionInfo(channel, time, version, remove, new HashMap<>());
 
-        FileAddHandler.iterateFiles(files, vi);
+        analyzeVersionFiles(vi, files);
 
         this.registerVersion(vi);
         LOGGER.info("版本已创建: {}-{} 打包时间: {}", channel, version, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time));
     }
+
+
+    private VersionInfo buildInstallVersion(String channel) {
+        var paths = this.sources.get(channel).paths();
+        var files = new HashMap<String, File>();
+
+        for (var path : paths) {
+            var file = this.sources.get(channel).file(path);
+            files.put(path, file);
+        }
+
+        LOGGER.info(I18n.message("version.install.resource_pack"));
+
+        var vi = new VersionInfo(channel, System.currentTimeMillis(), "__install", new HashSet<>(), new HashMap<>());
+
+        analyzeVersionFiles(vi, files);
+
+        return vi;
+    }
+
+    private VersionInfo createInstallVersion(String channel) {
+        var data = sorted(channel);
+        var latest = (VersionInfo) null;
+
+        if (!data.isEmpty()) {
+            latest = data.getLast();
+        }
+
+        var install = getVersionsByChannel(channel).get("__install");
+
+        if (latest == null) {
+            return new VersionInfo(channel,
+                    install.getTimestamp(),
+                    "[initial]",
+                    install.getDeleteFileList(),
+                    install.getResourcePackList(),
+                    install.getUpdateFileList(),
+                    install.getDownloadFileList()
+            );
+        }
+
+        return new VersionInfo(latest.getChannel(),
+                latest.getTimestamp(),
+                latest.getVersion(),
+                install.getDeleteFileList(),
+                install.getResourcePackList(),
+                install.getUpdateFileList(),
+                install.getDownloadFileList()
+        );
+    }
+
+    private void registerVersion(VersionInfo info) {
+        this.addVersion(info);
+        var file = new File(FilePaths.runtime() + "/versions/" + info.getChannel() + "/" + info.getVersion() + ".json");
+
+        if (file.getParentFile().mkdirs()) {
+            LOGGER.info(I18n.message("version.directory_created", file.getParentFile().getAbsolutePath()));
+        }
+
+        try (var o = new FileOutputStream(file)) {
+            o.write(info.json().toString().getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        if (Objects.equals(info.getVersion(), "__install")) {
+            return;
+        }
+
+        var logFile = new File(FilePaths.runtime() + "/versions/" + info.getChannel() + "/" + info.getVersion() + ".txt");
+
+        logFile.getParentFile().mkdirs();
+        try {
+            logFile.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        LOGGER.info(I18n.message("version.install.updating"));
+
+        registerVersion(buildInstallVersion(info.getChannel()));
+
+        LOGGER.info(I18n.message("version.registered", info.getChannel(), info.getVersion(), logFile.getAbsolutePath()));
+    }
+
+    private void analyzeVersionFiles(VersionInfo version, Map<String, File> files) {
+        var data = new HashSet<VersionFileAnalyzer.SourceFileInfo>();
+
+        for (var path : files.keySet()) {
+            var file = files.get(path);
+            var sha1 = DiffCheck.calculateSHA1(file);
+
+            data.add(new VersionFileAnalyzer.SourceFileInfo(path, file, sha1));
+        }
+
+        for (var handler : this.fileAnalyzerPipeline.list()) {
+            handler.handleFiles(data, version);
+        }
+    }
+
+    private CompiledVersionData composeVersionData(List<VersionInfo> versions) {
+        versions.sort(Comparator.comparingLong(VersionInfo::getTimestamp));
+
+        if (versions.isEmpty()) {
+            return null;
+        }
+
+        var latest = versions.getLast();
+
+
+        var channel = latest.getChannel();
+        var channelName = this.sources.get(channel).meta().name();
+        var headTimeStamp = latest.getTimestamp();
+
+        var result = new CompiledVersionData(channel, channelName, headTimeStamp);
+
+        for (var version : versions) {
+            result.addElapsedUpdateLog(version.getVersion(), getVersionLog(channel, version.getVersion()));
+        }
+
+        return result;
+    }
+
 
     @Override
     public boolean handleCommand(String command, String[] args) {
@@ -318,15 +431,20 @@ public final class VersionService implements Service {
         }
 
         if ((packet instanceof P11_UpdateRequest request)) {
-            var sum = getService(ResourcePackService.class).getChecksumManager();
-            var vs = new VersionSet();
+            MCUpdaterServer.instance().getExecutor().submit(() -> {
+                var data = compile(request.getCurrentVersions());
+                MCUProtocolV2.sendPacket(ctx, new P21_VersionHeaders(data));
+            });
 
+            /*
+            var sum = this.resourceRepository;
+            var vs = new VersionSet();
             var versions = request.getCurrentVersions().entrySet().stream().map((e) -> this.from(e.getKey(), e.getValue(), vs)).collect(
                     Collectors.toSet());
-
             versions.removeIf(Objects::isNull);
-
             MCUProtocolV2.sendPacket(ctx, new P21_VersionHeaders(versions, vs, sum));
+            return;
+            */
             return;
         }
 
@@ -336,7 +454,7 @@ public final class VersionService implements Service {
 
             for (var channel : versions.keySet()) {
                 for (var version : versions.get(channel)) {
-                    result.addLog(channel, version, log(channel, version));
+                    result.addLog(channel, version, getVersionLog(channel, version));
                 }
             }
 
@@ -345,6 +463,7 @@ public final class VersionService implements Service {
             }
 
             MCUProtocolV2.sendPacket(ctx, result);
+            return;
         }
     }
 }

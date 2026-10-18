@@ -2,6 +2,7 @@ package org.atcgroup.mcupdater.client.download;
 
 import me.gb2022.commons.file.FilePath;
 import org.atcgroup.mcupdater.PatchFile;
+import org.atcgroup.mcupdater.UpdateHeader;
 import org.atcgroup.mcupdater.client.ClientFilePath;
 import org.atcgroup.mcupdater.client.ui.TaskListener;
 import org.atcgroup.mcupdater.client.ui.screen.ProcessScreen;
@@ -9,74 +10,91 @@ import org.atcgroup.mcupdater.util.FilePaths;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class DownloadResult {
-    private final Set<String> filesToExtract = new HashSet<>();
-    private final Map<String, String> filesToUpdate = new ConcurrentHashMap<>();
     private final Set<Future<?>> tasksToWait = new HashSet<>();
     private int waitingCounter = 0;
-    private TaskListener listener =null;
+    private TaskListener listener = null;
+    private long lastUpdateTime;
 
-    public void addExtractFile(String file) {
-        this.filesToExtract.add(file);
-    }
+    private final UpdateHeader header;
 
-    public void addUpdateFile(String dest, String file) {
-        this.filesToUpdate.put(dest, file);
+    public DownloadResult(UpdateHeader header) {
+        this.header = header;
     }
 
     public void addPendingTask(Future<?> task) {
         this.tasksToWait.add(task);
     }
 
-    public void update(){
-        this.waitingCounter++;
-        var total = this.tasksToWait.size();
-
-        if(this.listener == null){
-            return;
-        }
-        if (!((ProcessScreen) this.listener).isActive()) {
-            this.listener.setProgress((int) ((float) this.waitingCounter / total * 100));
-            this.listener.setProgressTitle("正在等待下载任务完成(点击[后台任务]可查看): %s/%s".formatted(this.waitingCounter, total));
-        }
-    }
-
     public void sync(TaskListener listener) {
         this.listener = listener;
 
-        for (var task : this.tasksToWait) {
-            update();
+        var active = new AtomicBoolean(true);
+        var trackerThread = new Thread(() -> {
+            while (active.get()) {
+                var now = System.currentTimeMillis();
+                var elapsed = now - this.lastUpdateTime;
+                this.lastUpdateTime = now;
 
+                var total = this.tasksToWait.size();
+
+                if (!(this.listener instanceof ProcessScreen ps)) {
+                    continue;
+                }
+
+                if (!ps.isActive()) {
+                    var spd = (ps.checkAllWorkDiff() / (elapsed / 1000f)) / 1048576f;
+
+                    this.listener.setProgress((int) ((float) this.waitingCounter / total * 100));
+                    this.listener.setProgressTitle("正在等待下载任务完成(点击[后台任务]可查看): %s/%s [总速度: %.2f MB/s]".formatted(this.waitingCounter, total, spd));
+                }
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }, "DownloadTaskTracker");
+
+        trackerThread.start();
+
+        for (var task : this.tasksToWait) {
             try {
                 task.get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
         }
-    }
 
-    public Map<String, String> getFilesToUpdate() {
-        return filesToUpdate;
-    }
-
-    public Set<String> getFilesToExtract() {
-        return filesToExtract;
+        active.set(false);
+        trackerThread.interrupt();
     }
 
     public void complete(TaskListener listener) {
         var counter = 1;
-        for (var s : this.filesToExtract) {
+        var delete = this.header.getDeleteFiles();
+        for (var s : delete) {
+            var a = delete.size();
+            var p = (int) (counter / (float) a * 100);
+
+            listener.setUnsureProgress("正在移除旧版文件 [%s/%s - %s%%] : %s".formatted(counter, a, p, s));
+
+            counter++;
+        }
+
+        counter = 1;
+        var extract = this.header.getExpandFiles();
+        for (var s : extract) {
             var file = ClientFilePath.CACHE.append(s).file();
-            var a0 = this.filesToExtract.size();
+            var a0 = extract.size();
 
             int finalCounter = counter;
             PatchFile.unzip(file, FilePaths.runtime(), (c, a) -> {
@@ -90,10 +108,11 @@ public final class DownloadResult {
 
         counter = 1;
 
-        var a0 = this.filesToUpdate.size();
-        for (var s : this.filesToUpdate.keySet()) {
-            var cache = ClientFilePath.CACHE.append(this.filesToUpdate.get(s)).file();
-            var target = FilePath.RUNTIME.append(s).file();
+        var a0 = this.header.getReplaceFiles().size();
+        var update = this.header.getReplaceFiles();
+        for (var s : update.keySet()) {
+            var cache = ClientFilePath.CACHE.append(s).file();
+            var target = FilePath.RUNTIME.append(update.get(s)).file();
 
             target.getParentFile().mkdirs();
             try {
@@ -112,5 +131,9 @@ public final class DownloadResult {
             }
             counter++;
         }
+    }
+
+    public void pendingTaskComplete() {
+        this.waitingCounter++;
     }
 }

@@ -21,6 +21,7 @@ dependencies {
     implementation gbuildLib("me.gb2022.commons:commons-math")
     implementation gbuildLib("me.gb2022.commons:commons-container")
     implementation gbuildLib("me.gb2022.commons:commons-general")
+    implementation gbuildLib("me.gb2022.commons:commons-event")
 
     implementation 'com.google.code.gson:gson:2.12.1'
 
@@ -32,12 +33,16 @@ dependencies {
     implementation 'io.netty:netty-codec:4.1.119.Final'
     implementation 'io.netty:netty-handler:4.1.119.Final'
     implementation 'io.netty:netty-transport:4.1.119.Final'
+    implementation 'io.netty:netty-codec-http:4.1.119.Final'
     implementation projectLib("bukkit-configuration")
 
     implementation gbuildLib('me.gb2022.simpnet:simpnet-base')
     implementation("org.yaml:snakeyaml:1.19")
 
     implementation "org.apache.logging.log4j:log4j-core:2.8.1"
+    implementation platform("software.amazon.awssdk:bom:2.55.4")
+    implementation "software.amazon.awssdk:s3"
+    implementation "software.amazon.awssdk:s3-transfer-manager"
 }
 
 jar{

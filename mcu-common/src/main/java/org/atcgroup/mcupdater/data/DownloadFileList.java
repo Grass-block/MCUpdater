@@ -45,6 +45,13 @@ public final class DownloadFileList extends HashMap<String, Map<String, byte[]>>
         }
     }
 
+    public void removeFile(String channel, String file) {
+        if(!containsKey(channel)) {
+            return;
+        }
+        get(channel).remove(file);
+    }
+
     public void addFile(String channel, String file, byte[] sum) {
         this.computeIfAbsent(channel, k -> new HashMap<>()).put(file, sum);
     }

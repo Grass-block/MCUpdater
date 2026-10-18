@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.server.file;
+package org.atcgroup.mcupdater.server.analyzer;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
@@ -21,7 +21,7 @@ import java.util.Set;
 
 //todo: CF API需要个人APIKey，暂时不再做支持。
 //SHIT!
-public final class CurseForgeModAnalyzer implements FileAddHandler {
+public final class CurseForgeModAnalyzer implements VersionFileAnalyzer {
     private static final int CF_FP_MAGIC = 0x5BD1E995; // 1540483477 WTF?
 
     private final List<String> matchExtensions;
@@ -99,7 +99,7 @@ public final class CurseForgeModAnalyzer implements FileAddHandler {
                 || b == 32; // space
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main_(String[] args) throws IOException, InterruptedException {
 
         String json = """
                 {

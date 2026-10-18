@@ -46,9 +46,7 @@ public final class TransportFileSession implements Closeable {
         }
 
         var newBuffer = new byte[bytes];
-
         System.arraycopy(this.buffer, 0, newBuffer, 0, bytes);
-
         return new P71_FTPPayload(this.currentPacketId, newBuffer);
     }
 

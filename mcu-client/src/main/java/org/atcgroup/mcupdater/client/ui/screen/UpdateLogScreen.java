@@ -1,31 +1,32 @@
 package org.atcgroup.mcupdater.client.ui.screen;
 
+import org.atcgroup.mcupdater.CompiledVersionData;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
-import org.atcgroup.mcupdater.client.Main;
 import org.atcgroup.mcupdater.client.ui.UI;
 import org.atcgroup.mcupdater.client.ui.component.ImagePanel;
 import org.atcgroup.mcupdater.client.ui.component.SimpleJList;
 import org.atcgroup.mcupdater.client.ui.component.UpdateInfoCard;
-import org.atcgroup.mcupdater.network.packet.P22_UpdateLogs;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.Locale;
+import java.util.Set;
 
-public class UpdateLogScreen extends Screen {
+public final class UpdateLogScreen extends Screen {
     private JTabbedPane tabs;
     private JPanel root;
     private JButton confirmButton;
 
-    public UpdateLogScreen(P22_UpdateLogs message) {
+
+    public UpdateLogScreen(Set<CompiledVersionData> message) {
         super();
 
         $$$setupUI$$$();
-        for (var channel : message.getChannelDisplayNames().keySet()) {
-            var display = message.getChannelDisplayNames().get(channel);
-            var logs = message.getLogs().get(channel);
+        for (var cvd : message) {
+            var display = cvd.getChannelDisplayName();
+            var logs = cvd.getElapsedUpdateLogs();
 
             var container = new JScrollPane();
             var root = new SimpleJList();
@@ -41,20 +42,8 @@ public class UpdateLogScreen extends Screen {
         this.confirmButton.addActionListener(e -> MCUpdaterClient.instance().dispose());
     }
 
-    public static void main(String[] args) {
-        Main.theme();
-        var frame = new JFrame();
-
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.setResizable(false);
-        frame.setSize(960, 640);
-        frame.setVisible(true);
-        frame.setTitle("MCUpdater 4.0.0 - UITest");
-        frame.setIconImage(UI.image("/icon.png"));
-        frame.setLocationRelativeTo(null);
-
-        frame.setContentPane(new UpdateLogScreen(P22_UpdateLogs.sample()).$$$getRootComponent$$$());
-        ((JPanel) frame.getContentPane()).updateUI();
+    private void createUIComponents() {
+        this.root = new ImagePanel(UI.background());
     }
 
     /**
@@ -113,9 +102,7 @@ public class UpdateLogScreen extends Screen {
         panel2.add(spacer2, gbc);
         final JLabel label1 = new JLabel();
         Font label1Font = this.$$$getFont$$$(null, -1, 22, label1.getFont());
-        if (label1Font != null) {
-            label1.setFont(label1Font);
-        }
+        if (label1Font != null) label1.setFont(label1Font);
         label1.setText("更新日志");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -149,9 +136,7 @@ public class UpdateLogScreen extends Screen {
      * @noinspection ALL
      */
     private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
-        if (currentFont == null) {
-            return null;
-        }
+        if (currentFont == null) return null;
         String resultName;
         if (fontName == null) {
             resultName = currentFont.getName();
@@ -165,11 +150,7 @@ public class UpdateLogScreen extends Screen {
         }
         Font font = new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
         boolean isMac = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH).startsWith("mac");
-        Font fontWithFallback = isMac ? new Font(
-                font.getFamily(),
-                font.getStyle(),
-                font.getSize()
-        ) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
+        Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
         return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
@@ -178,9 +159,5 @@ public class UpdateLogScreen extends Screen {
      */
     public JComponent $$$getRootComponent$$$() {
         return root;
-    }
-
-    private void createUIComponents() {
-        this.root = new ImagePanel(UI.background());
     }
 }

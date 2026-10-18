@@ -5,6 +5,7 @@ import me.gb2022.simpnet.channel.NettyChannelInitializer;
 import me.gb2022.simpnet.packet.Packet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.atcgroup.mcupdater.server.MCUpdaterServer;
 import org.atcgroup.mcupdater.util.I18n;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -15,11 +16,12 @@ public final class ServiceManager {
     private static final Logger LOGGER = LogManager.getLogger("ServiceManager");
     public Map<Class<? extends Service>, Service> services = new HashMap<>(16);
 
-    public ServiceManager() {
+    public ServiceManager(MCUpdaterServer server) {
         registerService(new ResourcePackService());
-        registerService(new VersionService());
+        registerService(new VersionService(server.getPacksFolder()));
         registerService(new NetworkService());
-        registerService(new CDNUploadService());
+        registerService(new CDNService());
+        registerService(new HttpFileServerService());
     }
 
     private void registerService(Service service) {
@@ -35,30 +37,30 @@ public final class ServiceManager {
         return type.cast(this.services.get(type));
     }
 
-    public void fireBootstrap(ConfigurationSection config) {
+    public void fireBootstrap(MCUpdaterServer server,ConfigurationSection config) {
         for (var service : this.services.values()) {
             try {
-                service.handleBootstrap(config);
+                service.handleServerBootstrap(server, config);
             } catch (Throwable t) {
                 this.handleException(service, "SV_BOOTSTRAP", t);
             }
         }
     }
 
-    public void fireServerClose() {
+    public void fireServerClose(MCUpdaterServer server) {
         for (var service : this.services.values()) {
             try {
-                service.handleServerClose();
+                service.handleServerClose(server);
             } catch (Throwable t) {
                 this.handleException(service, "SV_CLOSE", t);
             }
         }
     }
 
-    public void fireNetworkBootstrap(NettyChannelInitializer initializer) {
+    public void fireNetworkBootstrap(MCUpdaterServer server, NettyChannelInitializer initializer) {
         for (var service : this.services.values()) {
             try {
-                service.handleNetworkBootstrap(initializer);
+                service.handleNetworkBootstrap(server,initializer);
             } catch (Throwable t) {
                 this.handleException(service, "NET_BOOTSTRAP", t);
             }

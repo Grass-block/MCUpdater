@@ -8,14 +8,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
 import org.atcgroup.mcupdater.network.TransportFileSession;
-import org.atcgroup.mcupdater.network.packet.P72_FTPPayloadReceived;
-import org.atcgroup.mcupdater.network.packet.P73_FTPCancel;
 import org.atcgroup.mcupdater.network.packet.P74_FTPComplete;
 import org.atcgroup.mcupdater.network.packet.P75_FTPCompleteResponse;
 import org.atcgroup.mcupdater.util.Async;
+import org.atcgroup.mcupdater.util.AsyncLock;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FileDownloadHandler extends PacketInboundHandler {
     public static final Logger LOGGER = LogManager.getLogger("FTPDownloadHandler");
@@ -24,7 +24,10 @@ public class FileDownloadHandler extends PacketInboundHandler {
     private final String token;
     private final List<File> files;
     private Channel channel;
-    private TransportFileSession session;
+
+    private final AsyncLock writableLock = new AsyncLock();
+    private final AtomicBoolean active = new AtomicBoolean(false);
+    private volatile TransportFileSession activeSession = null;
 
     public FileDownloadHandler(String user, String token, List<File> files) {
         this.user = user;
@@ -42,22 +45,57 @@ public class FileDownloadHandler extends PacketInboundHandler {
     public void onFileReadComplete(File file) {
     }
 
-    public final void push() throws Exception {
-        this.session = new TransportFileSession(this.files.remove(0));
+    public void recordProgress(File file, long p, long fp) {
+    }
 
-        var header = this.session.createHeader(this.user, this.token);
+    private void sendFile(File file) throws Exception {
+        var pid = 0L;
+        if (this.active.get()) {
+            throw new IllegalStateException("File transfer still active!");
+        }
 
+        this.active.set(true);
+        var session = this.activeSession = new TransportFileSession(file);
+        var header = session.createHeader(this.user, this.token);
+
+        this.onFileReadStart(session.getFile());
+
+        MCUProtocolV2.sendPacket(this.channel, header);
+
+        LOGGER.info(
+                "Starting file push {} ({} bytes in {} packets)",
+                header.getFilename(),
+                header.getTotalLength(),
+                header.getTotalPackets()
+        );
+
+        while (!session.complete()) {
+            pid++;
+
+            var packet = session.next();
+
+            MCUProtocolV2.sendPacket(this.channel, packet).sync();
+            this.writableLock.monitor();
+
+            if (pid % 4 == 0) {
+                recordProgress(file, pid, header.getTotalPackets());
+            }
+        }
+
+        MCUProtocolV2.sendPacket(this.channel, new P74_FTPComplete());
+        this.onFileReadComplete(file);
+        session.close();
+
+        this.active.set(false);
+    }
+
+    public final void push() {
         Async.WORKER.submit(() -> {
-            this.onFileReadStart(this.session.getFile());
-
-            MCUProtocolV2.sendPacket(this.channel, header);
-
-            LOGGER.info(
-                    "Starting file push {} ({} bytes in {} packets)",
-                    header.getFilename(),
-                    header.getTotalLength(),
-                    header.getTotalPackets()
-            );
+            try {
+                this.sendFile(this.files.remove(0));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 
@@ -67,41 +105,24 @@ public class FileDownloadHandler extends PacketInboundHandler {
     }
 
     @Override
-    public final void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if (this.session != null) {
-            this.session.close();
+    public void channelWritabilityChanged(ChannelHandlerContext ctx) {
+        if (!ctx.channel().isWritable()) {
+            this.writableLock.pause();
+        } else {
+            this.writableLock.resume();
         }
     }
 
     @Override
     protected final void channelRead0(ChannelHandlerContext ctx, Packet p) throws Exception {
-        if (p instanceof P72_FTPPayloadReceived message) {
-            var localCurrent = this.session.getCurrentPacketId();
-            var remoteCurrent = message.getId();
-
-            if (localCurrent != remoteCurrent) {
-                MCUProtocolV2.sendPacket(ctx, new P73_FTPCancel());
-                ctx.disconnect();
-                return;
-            }
-
-            if (this.session.complete()) {
-                MCUProtocolV2.sendPacket(ctx, new P74_FTPComplete());
-                this.onFileReadComplete(this.session.getFile());
-                this.session.close();
-                return;
-            }
-
-            MCUProtocolV2.sendPacket(ctx, this.session.next());
-            return;
-        }
-
         if (p instanceof P75_FTPCompleteResponse response) {
             if (!response.isSuccess()) {
-                this.files.add(0, this.session.getFile());
+                var file = this.activeSession.getFile();
+
+                this.files.add(0, file);
                 this.push();//push file back, start again
 
-                LOGGER.warn("File {} failed cdn verification, restarting upload.", this.session.getFile().getName());
+                LOGGER.warn("File {} failed verification, restarting upload.", file.getName());
                 return;
             }
 
@@ -112,7 +133,7 @@ public class FileDownloadHandler extends PacketInboundHandler {
                 return;
             }
 
-            LOGGER.warn("File {} uploaded successfully, starting next.", this.session.getFile().getName());
+            LOGGER.warn("File {} sent successfully, starting next.", this.activeSession.getFile().getName());
             this.push();
 
             return;

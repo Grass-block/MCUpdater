@@ -7,19 +7,20 @@ import org.atcgroup.mcupdater.server.MCUpdaterServer;
 import org.bukkit.configuration.ConfigurationSection;
 
 public interface Service {
-    default void handleNetworkBootstrap(NettyChannelInitializer initializer) throws Throwable {
+    default void handleServerBootstrap(MCUpdaterServer server, ConfigurationSection config) throws Throwable {
     }
 
-    default void handleBootstrap(ConfigurationSection config) throws Throwable {
+    default void handleNetworkBootstrap(MCUpdaterServer server, NettyChannelInitializer initializer) throws Throwable {
     }
 
-    default void handleServerClose() throws Throwable {
+
+    default void handleServerClose(MCUpdaterServer server) throws Throwable {
     }
 
     default void handleNetworkMessage(Packet packet, ChannelHandlerContext ctx) throws Throwable {
     }
 
-    default boolean handleCommand(String command,String[] args) {
+    default boolean handleCommand(String command, String[] args) {
         return false;
     }
 

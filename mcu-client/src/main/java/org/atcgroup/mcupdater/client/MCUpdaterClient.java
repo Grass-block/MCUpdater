@@ -1,27 +1,26 @@
 package org.atcgroup.mcupdater.client;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.atcgroup.mcupdater.UpdateHeader;
 import org.atcgroup.mcupdater.client.download.DownloadResolver;
 import org.atcgroup.mcupdater.client.download.DownloadResult;
 import org.atcgroup.mcupdater.client.network.ClientNetworkService;
 import org.atcgroup.mcupdater.client.ui.MainWindow;
 import org.atcgroup.mcupdater.client.ui.screen.*;
-import org.atcgroup.mcupdater.client.util.Log;
 import org.atcgroup.mcupdater.client.util.NotificationService;
 import org.atcgroup.mcupdater.data.ServerMeta;
-import org.atcgroup.mcupdater.data.VersionInfo;
-import org.atcgroup.mcupdater.data.VersionSet;
 import org.atcgroup.mcupdater.network.packet.*;
 import org.atcgroup.mcupdater.util.AsyncLock;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class MCUpdaterClient {
+    public static final Logger LOGGER = LogManager.getLogger("MCU/Client");
     public static final MCUpdaterClient INSTANCE = new MCUpdaterClient();
     public static final ExecutorService BACKGROUND_EXEC = Executors.newFixedThreadPool(12);
 
@@ -31,10 +30,9 @@ public final class MCUpdaterClient {
     private final MainWindow window = new MainWindow(this);
     private final ProcessScreen processScreen = new ProcessScreen();
     private final AsyncLock lock = new AsyncLock();
-    private final DownloadResult downloadResult = new DownloadResult();
+    private DownloadResult downloadResult;
     private ServerMeta serverMeta;
-    private Set<VersionInfo> targetVersions;
-    private VersionSet targetVersionRecord;
+    private UpdateHeader header;
     private boolean isErrored = false;
 
     public static MCUpdaterClient instance() {
@@ -84,7 +82,7 @@ public final class MCUpdaterClient {
         if(this.isErrored) {
             return;
         }
-        Log.info("server: " + message);
+        LOGGER.info("server: " + message);
         this.serverMeta = message.getServerMeta();
 
         if (this.info.isInvalid()) {
@@ -154,12 +152,13 @@ public final class MCUpdaterClient {
         if(this.isErrored) {
             return;
         }
-        this.targetVersions = headers.getVersions();
-        this.targetVersionRecord = headers.getVersionSet();
 
+        this.header = headers.getHeader();
         this.processScreen.setTitle("正在下载资源");
+        this.downloadResult = new DownloadResult(this.header);
+
         for (var resolver : DownloadResolver.RESOLVERS) {
-            resolver.resolve(headers, this.downloadResult);
+            resolver.resolve(this.header, this.downloadResult);
         }
     }
 
@@ -167,30 +166,14 @@ public final class MCUpdaterClient {
         if(this.isErrored) {
             return;
         }
+
         this.processScreen.setActive(false);
         this.downloadResult.sync(this.processScreen);
 
         this.processScreen.setUnsureProgress("正在更新本地资源...");
-
-        var mergedDeletes = new ArrayList<String>();
-
-        for (var v : this.targetVersions) {
-            mergedDeletes.addAll(v.getDeleteFileList());
-        }
-
-        var counter = 1;
-        for (var s : mergedDeletes) {
-            var a = mergedDeletes.size();
-            var p = (int) (counter / (float) a * 100);
-
-            this.processScreen.setUnsureProgress("正在移除旧版文件 [%s/%s - %s%%] : %s".formatted(counter, a, p, s));
-
-            counter++;
-        }
-
         this.downloadResult.complete(this.processScreen);
 
-        Log.info("Update complete.");
+        LOGGER.info("Update complete.");
         completeUpdate();
     }
 
@@ -198,33 +181,24 @@ public final class MCUpdaterClient {
         if(this.isErrored) {
             return;
         }
-        for (var v : this.targetVersions) {
-            this.info.setTime(v.getChannel(), v.getTimestamp());
+        for (var v : this.header.getVersions()) {
+            this.info.setTime(v.getChannel(), v.getHeadTimeStamp());
         }
 
         this.info.save();
+        this.networkService.shutdown();
 
-        if (this.targetVersionRecord.isEmpty() || this.targetVersionRecord.values().stream().allMatch(Set::isEmpty)) {
-            this.networkService.shutdown();
+        if (this.header.getVersions().isEmpty()) {
             this.dispose();
             NotificationService.getInstance().notify("客户端暂无更新", "客户端资源暂无变更，游戏即将启动 :D");
-            Log.info("No changes happened, disposed client.");
+            LOGGER.info("No changes happened, disposed client.");
             return;
         }
 
         this.lock.resume();
         NotificationService.getInstance().notify("客户端更新完成", "客户端资源更新完成，游戏即将启动 :D");
 
-        Log.info("Successfully booted game thread, requesting update log from server.");
-        this.networkService.write(new P12_UpdateLogRequest(this.targetVersionRecord));
-    }
-
-    public void handleLogReceived(P22_UpdateLogs message) {
-        if(this.isErrored) {
-            return;
-        }
-        this.networkService.shutdown();
-        this.window.setScreen(new UpdateLogScreen(message));
+        this.window.setScreen(new UpdateLogScreen(this.header.getVersions()));
     }
 
     public void handleConfigReceived(P20_ChannelHeaders message) {

@@ -10,7 +10,7 @@
 <!-- PROJECT LOGO / TITLE -->
 <br />
 <div align="center">
-  <img src="logo-scaled.png" alt="logo" width="160">
+  <img src="/logo-scaled.png" alt="logo" width="160">
   <h3 align="center">MCUpdater</h3>
   <p align="center">
     A modular auto-update & distribution system for Minecraft server / client resources.

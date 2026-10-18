@@ -13,7 +13,6 @@ import java.io.File;
 public final class ClientFileReceiveHandler extends FileReceiveHandler {
     public static final Logger LOGGER = LogManager.getLogger("MCU/FileReceiveHandler");
 
-
     @Override
     public File getFile(P70_FTPHeader header) {
         return ClientFilePath.CACHE.append(header.getFilename()).file();
@@ -38,7 +37,7 @@ public final class ClientFileReceiveHandler extends FileReceiveHandler {
         var p = (int) ((double) received / (double) total * 100);
 
         MCUpdaterClient.INSTANCE.getProcessScreen().setProgress(p);
-        MCUpdaterClient.INSTANCE.getProcessScreen().setTitle("正在下载资源文件: %s - %s%% (%s/%s MiB)".formatted(name, p, r, t));
+        MCUpdaterClient.INSTANCE.getProcessScreen().setProgressTitle("正在下载资源文件: %s - %s%% (%s/%s MiB)".formatted(name, p, r, t));
     }
 
     @Override

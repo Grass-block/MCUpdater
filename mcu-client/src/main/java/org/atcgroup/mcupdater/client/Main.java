@@ -1,8 +1,9 @@
 package org.atcgroup.mcupdater.client;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.client.util.ApplicationEntry;
-import org.atcgroup.mcupdater.client.util.Log;
 import org.atcgroup.mcupdater.client.util.NotificationService;
 import org.atcgroup.mcupdater.util.FilePaths;
 
@@ -13,6 +14,8 @@ import java.lang.instrument.Instrumentation;
 import java.util.Properties;
 
 public interface Main {
+    Logger LOGGER = LogManager.getLogger("MCU/Main");
+
     @ApplicationEntry
     static void premain(String agentArgs, Instrumentation inst) {
         boot();
@@ -30,7 +33,7 @@ public interface Main {
         NotificationService.getInstance().init();
 
         if (!file.exists() || file.length() == 0) {
-            Log.error("config file does not exist.");
+            LOGGER.error("config file does not exist.");
         }
 
         MCUpdaterClient.INSTANCE.start();
@@ -50,7 +53,7 @@ public interface Main {
                 UIManager.put(key, Color.decode(properties.getProperty(key.toString())));
             }
         } catch (Exception ex) {
-            System.err.println("Failed to initialize LaF");
+            LOGGER.error("Failed to initialize LaF", ex);
         }
     }
 }

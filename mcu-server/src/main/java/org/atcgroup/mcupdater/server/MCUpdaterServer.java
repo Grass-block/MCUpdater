@@ -3,6 +3,7 @@ package org.atcgroup.mcupdater.server;
 import me.gb2022.commons.file.FilePath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.atcgroup.mcupdater.FileRepository;
 import org.atcgroup.mcupdater.data.ServerMeta;
 import org.atcgroup.mcupdater.server.service.ServiceManager;
 import org.atcgroup.mcupdater.util.I18n;
@@ -15,14 +16,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class MCUpdaterServer {
     public static final Logger LOGGER = LogManager.getLogger("Server");
     public static final MCUpdaterServer INSTANCE = new MCUpdaterServer();
 
-    private final ServiceManager serviceManager = new ServiceManager();
+    private final FileRepository packsFolder = new FileRepository(FilePath.RUNTIME.append("packs"));
+    private final ServiceManager serviceManager = new ServiceManager(this);
     private final FileConfiguration config = new YamlConfiguration();
     private final ConsoleService consoleService = new ConsoleService();
+
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
+
+
+    public FileRepository getPacksFolder() {
+        return packsFolder;
+    }
 
     public static MCUpdaterServer instance() {
         return INSTANCE;
@@ -65,7 +76,7 @@ public final class MCUpdaterServer {
             return;
         }
 
-        this.serviceManager.fireBootstrap(this.config());
+        this.serviceManager.fireBootstrap(this,this.config());
         this.consoleService.start();
 
         var passed = System.currentTimeMillis() - last;
@@ -79,18 +90,17 @@ public final class MCUpdaterServer {
 
     public ServerMeta createSession() {
         var uuid = UUID.randomUUID().toString();
-        var cdn = this.config().getBoolean("cdn-server.enable");
-        var address = this.config().getString("cdn-server.address");
-        var port = this.config().getInt("cdn-server.port");
-        var repo = this.config().getString("cdn-server.repository");
+        var cdn = this.config().getBoolean("cdn-service.mcu-cdn.enable");
+        var address = this.config().getString("cdn-service.mcu-cdn.address");
+        var port = this.config().getInt("cdn-service.mcu-cdn.port");
+        var repo = this.config().getString("cdn-service.mcu-cdn.repository");
 
         return new ServerMeta("mcu-server_prod", "4.0.0", uuid, cdn, address, port, repo);
     }
 
     public void stop() {
         this.consoleService.stop();
-
-        this.serviceManager.fireServerClose();
+        this.serviceManager.fireServerClose(this);
     }
 
     public ConsoleService getConsoleService() {
@@ -99,5 +109,9 @@ public final class MCUpdaterServer {
 
     public ServiceManager getServiceManager() {
         return serviceManager;
+    }
+
+    public ExecutorService getExecutor() {
+        return executorService;
     }
 }

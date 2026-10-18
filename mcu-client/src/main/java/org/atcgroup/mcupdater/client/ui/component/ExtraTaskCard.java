@@ -12,6 +12,19 @@ public final class ExtraTaskCard implements TaskListener {
     private JPanel root;
     private ProcessScreen parent;
 
+    private long lastCheckedWork = 0;
+    private long work;
+
+    public void setWork(long work) {
+        this.work = work;
+    }
+
+    public long checkWorkDiff() {
+        var diff = this.work - this.lastCheckedWork;
+        this.lastCheckedWork = this.work;
+        return diff;
+    }
+
     public void setParent(ProcessScreen parent) {
         this.parent = parent;
     }
@@ -84,4 +97,5 @@ public final class ExtraTaskCard implements TaskListener {
     public JComponent $$$getRootComponent$$$() {
         return root;
     }
+
 }

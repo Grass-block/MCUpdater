@@ -68,9 +68,7 @@ public final class UpdateChannelCard {
         root.add(spacer1, gbc);
         name = new JLabel();
         Font nameFont = this.$$$getFont$$$(null, -1, 18, name.getFont());
-        if (nameFont != null) {
-            name.setFont(nameFont);
-        }
+        if (nameFont != null) name.setFont(nameFont);
         name.setText("这是一个更新频道的名称");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -79,9 +77,7 @@ public final class UpdateChannelCard {
         root.add(name, gbc);
         desc = new JLabel();
         Font descFont = this.$$$getFont$$$(null, -1, 12, desc.getFont());
-        if (descFont != null) {
-            desc.setFont(descFont);
-        }
+        if (descFont != null) desc.setFont(descFont);
         desc.setText("这是一个更新频道的描述");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -121,9 +117,7 @@ public final class UpdateChannelCard {
      * @noinspection ALL
      */
     private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
-        if (currentFont == null) {
-            return null;
-        }
+        if (currentFont == null) return null;
         String resultName;
         if (fontName == null) {
             resultName = currentFont.getName();
@@ -137,11 +131,7 @@ public final class UpdateChannelCard {
         }
         Font font = new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
         boolean isMac = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH).startsWith("mac");
-        Font fontWithFallback = isMac ? new Font(
-                font.getFamily(),
-                font.getStyle(),
-                font.getSize()
-        ) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
+        Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
         return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
@@ -151,5 +141,4 @@ public final class UpdateChannelCard {
     public JComponent $$$getRootComponent$$$() {
         return root;
     }
-
 }

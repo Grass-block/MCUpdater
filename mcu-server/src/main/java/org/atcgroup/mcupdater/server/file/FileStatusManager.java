@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.server.data;
+package org.atcgroup.mcupdater.server.file;
 
 import me.gb2022.commons.math.SHA;
 import org.apache.logging.log4j.LogManager;

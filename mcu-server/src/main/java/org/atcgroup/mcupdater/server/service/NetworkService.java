@@ -2,17 +2,13 @@ package org.atcgroup.mcupdater.server.service;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
-import org.atcgroup.mcupdater.network.handler.DebugHandler;
 import org.atcgroup.mcupdater.network.packet.P01_ServerHello;
 import org.atcgroup.mcupdater.server.MCUpdaterServer;
 import org.atcgroup.mcupdater.util.I18n;
@@ -26,30 +22,25 @@ public final class NetworkService implements Service {
 
 
     @Override
-    public void handleBootstrap(ConfigurationSection config) {
+    public void handleServerBootstrap(MCUpdaterServer server,ConfigurationSection config) {
         var address = config.getString("server-address");
         var port = config.getInt("server-port");
-        var debug = config.getBoolean("debug", false);
 
         LOGGER.info(I18n.message("network.start"));
 
         try {
-            var sbs = new ServerBootstrap();
+            var bootstrap = new ServerBootstrap();
             var i = MCUProtocolV2.initializer();
 
-            if (debug) {
-                i.handler(DebugHandler::new);
-                sbs.handler(new LoggingHandler(LogLevel.INFO));
-            }
             i.handler(() -> new ServerHandler(MCUpdaterServer.instance()));
-            MCUpdaterServer.instance().getServiceManager().fireNetworkBootstrap(i);
 
-            sbs.group(this.bossGroup, this.workerGroup);
-            sbs.channel(NioServerSocketChannel.class);
-            sbs.option(ChannelOption.SO_BACKLOG, 128);
-            sbs.childOption(ChannelOption.SO_KEEPALIVE, true);
-            sbs.childHandler(i);
-            sbs.bind(port).sync();
+            MCUpdaterServer.instance().getServiceManager().fireNetworkBootstrap(MCUpdaterServer.instance(),i);
+            MCUProtocolV2.serverOptions(bootstrap);
+
+            bootstrap.group(this.bossGroup, this.workerGroup);
+            bootstrap.channel(NioServerSocketChannel.class);
+            bootstrap.childHandler(i);
+            bootstrap.bind(port).sync();
 
             LOGGER.info(I18n.message("network.started", address, port));
         } catch (Exception e) {
@@ -60,7 +51,7 @@ public final class NetworkService implements Service {
     }
 
     @Override
-    public void handleServerClose() {
+    public void handleServerClose(MCUpdaterServer server) {
         try {
             LOGGER.info(I18n.message("network.stop"));
             this.bossGroup.shutdownGracefully();

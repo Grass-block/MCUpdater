@@ -1,16 +1,24 @@
 package org.atcgroup.mcupdater.network.handler;
 
 import io.netty.channel.ChannelHandlerContext;
+import me.gb2022.commons.math.SHA;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
-import org.atcgroup.mcupdater.network.packet.*;
+import org.atcgroup.mcupdater.network.packet.P70_FTPHeader;
+import org.atcgroup.mcupdater.network.packet.P71_FTPPayload;
+import org.atcgroup.mcupdater.network.packet.P74_FTPComplete;
+import org.atcgroup.mcupdater.network.packet.P75_FTPCompleteResponse;
 import org.atcgroup.mcupdater.util.DiffCheck;
 
 import java.io.File;
 import java.io.RandomAccessFile;
 
 public abstract class FileReceiveHandler extends PacketInboundHandler {
+    public static final Logger LOGGER = LogManager.getLogger("MCU/ReceiveHandler");
+
     private File file;
     private String user;
     private RandomAccessFile randomAccessFile;
@@ -36,17 +44,11 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("WTF?");
-    }
-
-    @Override
     public final void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
-        System.out.println(packet);
-
         if (packet instanceof P70_FTPHeader header) {
             if (!validateConnection(header.getUser(), header.getToken())) {
                 ctx.disconnect();
+                return;
             }
 
             if (this.randomAccessFile != null) {
@@ -68,12 +70,11 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
             this.user = header.getUser();
 
             this.onWriteStart(this.file, header);
-
-            MCUProtocolV2.sendPacket(ctx, new P72_FTPPayloadReceived(-1));
             return;
         }
 
         if (packet instanceof P71_FTPPayload payload) {
+            long last = System.currentTimeMillis();
             var offset = payload.getId() * MCUProtocolV2.CDN_PAYLOAD_SIZE;
             var data = payload.getData();
 
@@ -81,8 +82,6 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
             this.randomAccessFile.write(data);
 
             this.onProcess(this.file.getName(), offset + data.length, this.len);
-
-            MCUProtocolV2.sendPacket(ctx, new P72_FTPPayloadReceived(payload.getId()));
             return;
         }
 
@@ -90,13 +89,13 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
             var targetSHA256 = DiffCheck.calculateSHA256(this.file);
 
             if (this.len != this.randomAccessFile.length()) {
-                System.out.println(this.file.getName() + " failed - length mismatch - " + randomAccessFile.length() + "/" + this.len);
+                LOGGER.warn("{} failed - length mismatch - {}/{}", this.file.getName(), randomAccessFile.length(), this.len);
                 MCUProtocolV2.sendPacket(ctx, new P75_FTPCompleteResponse(false));
                 return;
             }
 
             if (!DiffCheck.compare(targetSHA256, this.sha256)) {
-                System.out.println(this.file.getName() + " failed - SHA256 mismatch!");
+                LOGGER.warn("{} failed - SHA256 mismatch!", this.file.getName());
                 MCUProtocolV2.sendPacket(ctx, new P75_FTPCompleteResponse(false));
                 return;
             }
@@ -104,7 +103,7 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
             MCUProtocolV2.sendPacket(ctx, new P75_FTPCompleteResponse(true));
             this.randomAccessFile.close();
 
-            this.onWriteComplete(this.user,this.file);
+            this.onWriteComplete(this.user, this.file);
             return;
         }
 

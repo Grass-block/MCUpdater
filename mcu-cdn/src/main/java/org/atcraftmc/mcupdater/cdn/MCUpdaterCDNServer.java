@@ -1,22 +1,16 @@
 package org.atcraftmc.mcupdater.cdn;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import me.gb2022.commons.file.FilePath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.atcgroup.mcupdater.FileRepository;
 import org.atcgroup.mcupdater.network.ErrorCatchHandler;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
-import org.atcgroup.mcupdater.network.handler.HeartBeatHandler;
-import org.atcgroup.mcupdater.util.FileChecksumManager;
-import org.atcraftmc.mcupdater.cdn.handler.CDNMainHandler;
-import org.atcraftmc.mcupdater.cdn.handler.CDNUploadReceiveHandler;
+import org.atcgroup.mcupdater.network.NettyHttpFileServer;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,8 +25,8 @@ public final class MCUpdaterCDNServer implements Runnable {
     public static final Logger LOGGER = LogManager.getLogger("MCU-CDNServer");
     private final NioEventLoopGroup bossGroup = new NioEventLoopGroup();
     private final NioEventLoopGroup workerGroup = new NioEventLoopGroup();
-    private final FileStatusManager fileManager = new FileStatusManager();
-    private final Map<String, FileChecksumManager> repoChecksumManagers = new HashMap<>();
+    private final Map<String, FileRepository> repoChecksumManagers = new HashMap<>();
+    private final NettyHttpFileServer server = new NettyHttpFileServer();
 
     private final Properties props = new Properties();
 
@@ -40,12 +34,8 @@ public final class MCUpdaterCDNServer implements Runnable {
         new Thread(INSTANCE).start();
     }
 
-    public FileChecksumManager getRepoChecksumManager(String repo) {
-        return this.repoChecksumManagers.computeIfAbsent(repo, (k) -> new FileChecksumManager(FILE_PATH.append(repo)));
-    }
-
-    public FileStatusManager getFileManager() {
-        return fileManager;
+    public FileRepository getRepository(String repo) {
+        return this.repoChecksumManagers.computeIfAbsent(repo, (k) -> new FileRepository(FILE_PATH.append(repo)));
     }
 
     @Override
@@ -72,26 +62,41 @@ public final class MCUpdaterCDNServer implements Runnable {
         var address = this.props.getProperty("server.address");
         var port = this.props.getProperty("server.port");
 
+        if (this.props.containsKey("server.http-port")) {
+            try {
+                var p = Integer.parseInt(this.props.getProperty("server.http-port"));
+                this.server.start(p);
+
+                for (var repo : this.props.keySet()) {
+                    if (repo.toString().startsWith("server.")) {
+                        continue;
+                    }
+                    this.server.registerBucket(repo.toString(), getRepository(repo.toString()));
+                }
+
+                LOGGER.info("成功启动Http文件传输加速于端点 {}", p);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
         LOGGER.info("正在启动网络服务...");
 
-        try {
-            var bootstrap = new ServerBootstrap();
+        var bootstrap = new ServerBootstrap();
 
-            bootstrap.group(this.bossGroup, this.workerGroup);
-            bootstrap.channel(NioServerSocketChannel.class);
-            bootstrap.option(ChannelOption.SO_BACKLOG, 128);
-            bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
-            bootstrap.handler(new LoggingHandler(LogLevel.WARN));
+        MCUProtocolV2.serverOptions(bootstrap);
 
-            var i = MCUProtocolV2.initializer();
+        bootstrap.group(this.bossGroup, this.workerGroup);
+        bootstrap.channel(NioServerSocketChannel.class);
 
-            i.handler(HeartBeatHandler::new);
+        bootstrap.childHandler(MCUProtocolV2.initializer().config((i) -> {
+            i.handler(() -> new CDNMainHandler(Integer.parseInt(this.props.getProperty("server.http-port", String.valueOf(-1)))));
+            i.handler(() -> new CDNUploadReceiveHandler(this::getRepository));
             i.handler(ErrorCatchHandler::new);
-            i.handler(() -> new CDNUploadReceiveHandler(this.fileManager));
-            i.handler(CDNMainHandler::new);
+        }));
 
-            bootstrap.childHandler(i);
-
+        try {
             var cf = bootstrap.bind(Integer.parseInt(port)).sync();
 
             LOGGER.info("成功启动网络服务于 {}:{}", address, port);

@@ -11,7 +11,7 @@ import me.gb2022.commons.math.SHA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
-import org.atcgroup.mcupdater.network.handler.DebugHandler;
+import org.atcgroup.mcupdater.network.handler.test.DebugHandler;
 import org.atcgroup.mcupdater.network.handler.FileDownloadHandler;
 import org.atcgroup.mcupdater.network.handler.FileReceiveHandler;
 import org.atcgroup.mcupdater.network.packet.P70_FTPHeader;

@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.server.service;
+package org.atcgroup.mcupdater.server.cdn;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,10 +10,11 @@ import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.atcgroup.mcupdater.FileRepository;
+import org.atcgroup.mcupdater.UpdateHeader;
 import org.atcgroup.mcupdater.network.ErrorCatchHandler;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
 import org.atcgroup.mcupdater.network.handler.FileDownloadHandler;
-import org.atcgroup.mcupdater.network.handler.HeartBeatHandler;
 import org.atcgroup.mcupdater.network.packet.P40_CDNFileCheckRequest;
 import org.atcgroup.mcupdater.network.packet.P41_CDNFileCheckResult;
 import org.atcgroup.mcupdater.server.MCUpdaterServer;
@@ -22,7 +23,6 @@ import org.atcgroup.mcupdater.util.I18n;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,51 +30,52 @@ import java.util.stream.Collectors;
 
 import static org.atcgroup.mcupdater.server.MCUpdaterServer.LOGGER;
 
-public final class CDNUploadService implements Service {
+public final class CDNStorageHandler implements CDNHandler {
     @Override
-    public boolean handleCommand(String command, String[] args) {
-        if (command.equals("cdn-upload")) {
-            var session = MCUpdaterServer.instance().createSession();
+    public void sync(FileRepository repository) {
+        var session = MCUpdaterServer.instance().createSession();
 
-            LOGGER.info(I18n.message("console.cdn_upload"));
-
-            if (!session.hasCDNInfo()) {
-                LOGGER.info(I18n.message("console.cdn_upload.missing"));
-            }
-            if (CDNUploadWorker.WORKING.get()) {
-                LOGGER.info(I18n.message("console.cdn_upload.active"));
-            }
-
-            var host = session.getCdnHost();
-            var port = session.getCdnPort();
-            var account = session.getCdnRepository();
-            var token = MCUpdaterServer.instance().config().getString("cdn-server.access-token");
-
-            var addr = new InetSocketAddress(host, port);
-
-            CDNUploadWorker.start(addr, account, token);
-            return true;
+        if (CDNUploadWorker.WORKING.get()) {
+            LOGGER.info(I18n.message("console.cdn_upload.active"));
+            return;
+        }
+        if (!session.hasCDNInfo()) {
+            LOGGER.info(I18n.message("console.cdn_upload.missing"));
+            return;
         }
 
-        return false;
+        var host = session.getCdnHost();
+        var port = session.getCdnPort();
+        var account = session.getCdnRepository();
+        var token = MCUpdaterServer.instance().config().getString("cdn-service.mcu-cdn.access-token");
+
+        var addr = new InetSocketAddress(host, port);
+
+        CDNUploadWorker.start(repository, addr, account, token);
+    }
+
+    @Override
+    public void handle(UpdateHeader data, FileRepository repository) {
     }
 
     public static final class CDNUploadWorker extends PacketInboundHandler implements Runnable {
         public static final Logger LOGGER = LogManager.getLogger("CDN-UploadWorker");
         public static final AtomicBoolean WORKING = new AtomicBoolean(false);
 
+        private final FileRepository target;
         private final SocketAddress address;
         private final String cdnRepository;
         private final String cdnToken;
 
-        public CDNUploadWorker(SocketAddress address, String cdnRepository, String cdnToken) {
+        public CDNUploadWorker(FileRepository target, SocketAddress address, String cdnRepository, String cdnToken) {
+            this.target = target;
             this.address = address;
             this.cdnRepository = cdnRepository;
             this.cdnToken = cdnToken;
         }
 
-        public static void start(SocketAddress address, String cdnAccount, String cdnToken) {
-            var worker = new CDNUploadWorker(address, cdnAccount, cdnToken);
+        public static void start(FileRepository target, SocketAddress address, String cdnAccount, String cdnToken) {
+            var worker = new CDNUploadWorker(target, address, cdnAccount, cdnToken);
             var thread = new Thread(worker, "CDN-uploader-" + worker.hashCode());
 
             WORKING.set(true);
@@ -86,8 +87,11 @@ public final class CDNUploadService implements Service {
         public void run() {
             var group = new NioEventLoopGroup();
             var bs = new Bootstrap();
+            bs.option(ChannelOption.SO_SNDBUF, 1048576);
+            bs.option(ChannelOption.SO_RCVBUF, 1048576);
+
             var protocol = MCUProtocolV2.initializer()
-                    .handler(HeartBeatHandler::new)
+                    //.handler(HeartBeatHandler::new)
                     .handler(() -> this)
                     .handler(ErrorCatchHandler::new);
 
@@ -106,13 +110,14 @@ public final class CDNUploadService implements Service {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            var sum = MCUpdaterServer.instance().getServiceManager().getService(ResourcePackService.class).getChecksumManager();
             var req = new P40_CDNFileCheckRequest(this.cdnRepository);
 
             Arrays.stream(Objects.requireNonNull(FilePath.RUNTIME.append("packs").file().listFiles()))
                     .filter((f) -> !f.getName().endsWith(".sum"))
+                    .filter((f) -> !f.getName().endsWith(".meta"))
                     .filter(File::isFile)
-                    .map(File::getName).forEach((s) -> req.addHashInfo(s, sum.getFileChecksum(s)));
+                    .map(File::getName)
+                    .forEach((s) -> req.addHashInfo(s, this.target.getFileInfo(s).getSha1Raw()));
 
             MCUProtocolV2.sendPacket(ctx, req);
             ctx.fireChannelActive();
@@ -121,12 +126,7 @@ public final class CDNUploadService implements Service {
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
             if (packet instanceof P41_CDNFileCheckResult r) {
-                new ArrayList<>(r.getNeedUpdate());
-
-                var f = r.getNeedUpdate()
-                        .stream()
-                        .map((s) -> FilePath.RUNTIME.append("packs").append(s).file())
-                        .collect(Collectors.toList());
+                var f = r.getNeedUpdate().stream().map((s) -> FilePath.RUNTIME.append("packs").append(s).file()).collect(Collectors.toList());
 
                 if (f.isEmpty()) {
                     LOGGER.info(I18n.message("console.cdn_upload.no-remain"));
@@ -134,6 +134,21 @@ public final class CDNUploadService implements Service {
                 }
 
                 var l = new FileDownloadHandler(this.cdnRepository, this.cdnToken, f) {
+                    @Override
+                    public void onFileReadStart(File file) {
+                        LOGGER.info("Transport Started: {}", file.getName());
+                    }
+
+                    @Override
+                    public void recordProgress(File file, long p, long fp) {
+                        LOGGER.info("Transport Progress: {} slice: {}/{}", file.getName(), p, fp);
+                    }
+
+                    @Override
+                    public void onFileReadComplete(File file) {
+                        LOGGER.info("Transport Completed: {}", file.getName());
+                    }
+
                     @Override
                     public void onGlobalComplete(ChannelHandlerContext ctx) {
                         super.onGlobalComplete(ctx);

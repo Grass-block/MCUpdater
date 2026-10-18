@@ -4,15 +4,15 @@ import io.netty.buffer.ByteBuf;
 import me.gb2022.simpnet.packet.DeserializedConstructor;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.util.BufferUtil;
-import org.atcgroup.mcupdater.data.DownloadFileList;
 
-import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class P31_FileDownloadStart implements Packet {
     private final String taskId;
-    private final DownloadFileList failedFiles;
+    private final Map<String, String> failedFiles;
 
-    public P31_FileDownloadStart(String taskId, DownloadFileList failedFiles) {
+    public P31_FileDownloadStart(String taskId, Map<String, String> failedFiles) {
         this.taskId = taskId;
         this.failedFiles = failedFiles;
     }
@@ -20,20 +20,30 @@ public final class P31_FileDownloadStart implements Packet {
     @DeserializedConstructor
     public P31_FileDownloadStart(ByteBuf buffer) {
         this.taskId = BufferUtil.readString(buffer);
-        this.failedFiles = new DownloadFileList(buffer);
+        this.failedFiles = new HashMap<>();
+
+        var len = buffer.readInt();
+        for (int i = 0; i < len; i++) {
+            this.failedFiles.put(BufferUtil.readString(buffer), BufferUtil.readString(buffer));
+        }
     }
 
     @Override
     public void write(ByteBuf buffer) {
         BufferUtil.writeString(buffer, this.taskId);
-        this.failedFiles.serialize(buffer);
+
+        buffer.writeInt(this.failedFiles.size());
+        for (Map.Entry<String, String> entry : this.failedFiles.entrySet()) {
+            BufferUtil.writeString(buffer, entry.getKey());
+            BufferUtil.writeString(buffer, entry.getValue());
+        }
     }
 
     public String getTaskId() {
         return taskId;
     }
 
-    public DownloadFileList getFailedFiles() {
+    public Map<String, String> getFailedFiles() {
         return failedFiles;
     }
 }

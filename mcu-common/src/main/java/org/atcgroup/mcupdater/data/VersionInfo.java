@@ -110,8 +110,8 @@ public final class VersionInfo {
         this.resourcePackList.add(id);
     }
 
-    public void addUpdateFile(String dest, String id) {
-        this.updateFileList.put(dest, id);
+    public void addUpdateFile(String id, String dest) {
+        this.updateFileList.put(id, dest);
     }
 
     public void addExternalDownloadFile(HttpDownloadInfo request) {

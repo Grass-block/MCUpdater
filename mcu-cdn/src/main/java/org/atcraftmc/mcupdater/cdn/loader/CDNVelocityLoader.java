@@ -1,9 +1,10 @@
-package org.atcraftmc.mcupdater.cdn;
+package org.atcraftmc.mcupdater.cdn.loader;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import me.gb2022.commons.file.FilePath;
+import org.atcraftmc.mcupdater.cdn.MCUpdaterCDNServer;
 
 @Plugin(id = "mc-updater-cdn")
 public final class CDNVelocityLoader {

@@ -16,9 +16,27 @@ config:
       detect-ext-name: [ "zip","jar" ]
       user-token: "YOUR_CF_API_TOKEN"
     fallback:
-      compress-threshold: 268435456 #对大于一定大小的文件不再压缩以保证不必要的处理时间
+      compress-threshold: 268435456 #对大于一定大小的文件不再压缩以减少不必要的处理时间
 
-  #下载加速服务器设置
+  cdn-service:
+    s3-cdn:
+      enable: false
+      endpoint: "https://s3.example.com"
+      bucket: "s3-example-bucket"
+      access-key-id: "s3-access-key"
+      access-key-secret: "s3-secret-access-key"
+      download-endpoint: "https://cdn.example.com/mcu-cdn"
+      resource-prefix: "/test-server"
+      region: "east-1"
+    mcu-cdn:
+      enable: false
+      address: cdn.example.com #目标CDN服务器的地址，客户端和服务端都会连接并上传下载文件。
+      port: 63000
+      access-token: cdn@vc_a2#test #用于上传权限的token
+      repository: test #在CDN服务上，你的前置路径
+      upload-rate-delay: 1 #上传速度限制(ms/pps)
+
+  #[弃用]下载加速服务器设置
   cdn-server:
     enable: false
     address: cdn.example.com #目标CDN服务器的地址，客户端和服务端都会连接并上传下载文件。

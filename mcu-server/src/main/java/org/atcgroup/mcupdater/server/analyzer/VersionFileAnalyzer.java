@@ -1,48 +1,17 @@
-package org.atcgroup.mcupdater.server.file;
+package org.atcgroup.mcupdater.server.analyzer;
 
 import org.atcgroup.mcupdater.data.VersionInfo;
-import org.atcgroup.mcupdater.util.DiffCheck;
-import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public interface FileAddHandler {
+public interface VersionFileAnalyzer {
     ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(16);
-    List<FileAddHandler> PIPELINE = new ArrayList<>();
-
-    static void init(ConfigurationSection config) {
-        for (var id : config.getStringList("order")) {
-            var dom = config.getConfigurationSection(id);
-
-            PIPELINE.add(switch (id) {
-                case "modrinth" -> new ModrinthModAnalyzer(dom);
-                case "fallback" -> new PackCompressHandler(dom);
-                case "curseforge" -> new CurseForgeModAnalyzer(dom);
-                default -> throw new IllegalStateException("Unexpected FileAnalyzer ID: " + id);
-            });
-        }
-    }
-
-    static void iterateFiles(Map<String, File> files, VersionInfo info) {
-        var data = new HashSet<SourceFileInfo>();
-
-        for (var path : files.keySet()) {
-            var file = files.get(path);
-            var sha1 = DiffCheck.calculateSHA1(file);
-
-            data.add(new SourceFileInfo(path, file, sha1));
-        }
-
-        for (var handler : PIPELINE) {
-            handler.handleFiles(data, info);
-        }
-    }
-
 
     default void handleFiles(Set<SourceFileInfo> files, VersionInfo info) {
         var toRemove = new HashSet<SourceFileInfo>();

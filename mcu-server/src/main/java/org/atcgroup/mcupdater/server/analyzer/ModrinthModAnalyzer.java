@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.server.file;
+package org.atcgroup.mcupdater.server.analyzer;
 
 import com.google.gson.JsonParser;
 import me.gb2022.commons.http.HttpMethod;
@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.data.HttpDownloadInfo;
 import org.atcgroup.mcupdater.data.VersionInfo;
+import org.atcgroup.mcupdater.util.DiffCheck;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;
@@ -15,12 +16,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.regex.Pattern;
 
 //ok啊小小测试一把
 //走你
-public final class ModrinthModAnalyzer implements FileAddHandler {
-
+public final class ModrinthModAnalyzer implements VersionFileAnalyzer {
     public static final Logger LOGGER = LogManager.getLogger("FileAnalyzer/Modrinth");
     private final Map<String, HttpDownloadInfo> urlCache = new HashMap<>();
     private final List<String> matchExtensions;
@@ -58,6 +58,7 @@ public final class ModrinthModAnalyzer implements FileAddHandler {
 
         if (this.urlCache.containsKey(key)) {
             info.addExternalDownloadFile(this.urlCache.get(key));
+            info.addUpdateFile(SHA.byteArrayToHexString(sha1).toLowerCase(), relPath);
             return true;
         }
 
@@ -91,10 +92,15 @@ public final class ModrinthModAnalyzer implements FileAddHandler {
         var sha1_t = fileSect.getAsJsonObject("hashes").get("sha1").getAsString();
         var size = fileSect.get("size").getAsLong();
 
-        var i = HttpDownloadInfo.of(url, relPath, size, sha1_t);
+        var i = HttpDownloadInfo.of(url, sha1_t, size, sha1_t);
 
         info.addExternalDownloadFile(i);
+        info.addUpdateFile(sha1_t, relPath);
+
         this.urlCache.put(key, i);
+
+
+
 
         return true;
     }

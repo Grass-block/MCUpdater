@@ -1,7 +1,6 @@
 package org.atcgroup.mcupdater.server;
 
 import org.atcgroup.mcupdater.ProductInfo;
-import org.atcgroup.mcupdater.server.service.CDNUploadService;
 import org.atcgroup.mcupdater.util.I18n;
 
 import java.util.Scanner;

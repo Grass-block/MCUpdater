@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.network.handler;
+package org.atcgroup.mcupdater.network.handler.test;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;

@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.server.data;
+package org.atcgroup.mcupdater.server.file;
 
 import org.atcgroup.mcupdater.data.UpdateChannelMeta;
 import org.bukkit.configuration.ConfigurationSection;

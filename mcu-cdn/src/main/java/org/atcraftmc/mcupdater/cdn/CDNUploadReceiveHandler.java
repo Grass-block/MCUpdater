@@ -1,33 +1,40 @@
-package org.atcraftmc.mcupdater.cdn.handler;
+package org.atcraftmc.mcupdater.cdn;
 
-import io.netty.channel.ChannelHandlerContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.atcgroup.mcupdater.FileRepository;
 import org.atcgroup.mcupdater.network.handler.FileReceiveHandler;
 import org.atcgroup.mcupdater.network.packet.P70_FTPHeader;
-import org.atcraftmc.mcupdater.cdn.FileStatusManager;
-import org.atcraftmc.mcupdater.cdn.MCUpdaterCDNServer;
 
 import java.io.File;
+import java.util.function.Function;
 
 public final class CDNUploadReceiveHandler extends FileReceiveHandler {
     public static final Logger LOGGER = LogManager.getLogger("FileUploadReceiver");
 
-    private final FileStatusManager fileManager;
+    private final Function<String, FileRepository> repositoryProvider;
 
-    public CDNUploadReceiveHandler(FileStatusManager fileManager) {
-        this.fileManager = fileManager;
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
+    public CDNUploadReceiveHandler(Function<String, FileRepository> provider) {
+        this.repositoryProvider = provider;
     }
 
     @Override
     public boolean validateConnection(String user, String token) {
-        //todo
-        return super.validateConnection(user, token);
+        var conf = MCUpdaterCDNServer.INSTANCE.config();
+
+        if(!conf.containsKey(user)){
+            LOGGER.error("REJECTED USER {}: User not found", user);
+            return false;
+        }
+
+        var result = conf.get(user).equals(token);
+
+        if(!result){
+            LOGGER.error("REJECTED USER {}: Key not match", user);
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -49,6 +56,6 @@ public final class CDNUploadReceiveHandler extends FileReceiveHandler {
     public void onWriteComplete(String user, File file) {
         var dest = MCUpdaterCDNServer.FILE_PATH.append(user).append(file.getName()).file();
         LOGGER.info("Completed file receive: {}", file.getName());
-        this.fileManager.queueFileMerge(user, dest, file);
+        this.repositoryProvider.apply(user).queueFileMerge(user, dest, file);
     }
 }

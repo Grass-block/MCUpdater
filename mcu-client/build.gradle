@@ -45,8 +45,8 @@ targetCompatibility = '17'
 
 jar {
     manifest {
-        attributes "Main-Class": "org.atcraftmc.updater.client.ClientBootstrap"
-        attributes "Premain-Class": "org.atcraftmc.updater.client.ClientBootstrap"
+        attributes "Main-Class": "org.atcgroup.mcupdater.client.Main"
+        attributes "Premain-Class": "org.atcgroup.mcupdater.client.Main"
     }
     archiveBaseName = "mc-updater-client"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

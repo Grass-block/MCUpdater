@@ -30,13 +30,14 @@ public final class ClientMainHandler extends PacketInboundHandler {
             return;
         }
 
-        if (packet instanceof P32_FileDownloadComplete) {
-            this.client.handleResourceDownloadComplete();
+        if (packet instanceof P33_FTPUpgradeToHttp message) {
+            var host = this.client.getServerMeta().getCdnHost();
+            ServerUpgradedDownloadTask.start(message, host).whenComplete((a, b) -> ctx.writeAndFlush(new P34_UpgradeFileDownloadComplete()));
             return;
         }
 
-        if (packet instanceof P22_UpdateLogs message) {
-            this.client.handleLogReceived(message);
+        if (packet instanceof P32_FileDownloadComplete) {
+            this.client.handleResourceDownloadComplete();
             return;
         }
 

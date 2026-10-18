@@ -1,87 +1,127 @@
 package org.atcgroup.mcupdater.network.handler;
 
 import io.netty.channel.ChannelHandlerContext;
-import me.gb2022.commons.file.FilePath;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import org.atcgroup.mcupdater.data.DownloadFileList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.atcgroup.mcupdater.FileRepository;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
-import org.atcgroup.mcupdater.network.packet.P30_FileDownloadRequest;
-import org.atcgroup.mcupdater.network.packet.P31_FileDownloadStart;
-import org.atcgroup.mcupdater.network.packet.P32_FileDownloadComplete;
-import org.atcgroup.mcupdater.util.DiffCheck;
-import org.atcgroup.mcupdater.util.FileChecksumManager;
+import org.atcgroup.mcupdater.network.packet.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class FileServerHandler extends PacketInboundHandler {
-    private final FilePath root;
-    private final FileChecksumManager checksumManager;
+public final class FileServerHandler extends PacketInboundHandler {
+    public static final Logger LOGGER = LogManager.getLogger("FileServerHandler");
 
-    public FileServerHandler(FilePath root) {
-        this.root = root;
-        this.checksumManager = new FileChecksumManager(root);
+    private final FileRepository repository;
+    private final AtomicBoolean active = new AtomicBoolean(false);
+    private final int httpFileDownloadServicePort;
+    private final String httpFileDownloadRepoName;
+
+    public FileServerHandler(FileRepository repository, int httpFileDownloadServicePort, String httpFileRepoName) {
+        this.repository = repository;
+        this.httpFileDownloadServicePort = httpFileDownloadServicePort;
+        this.httpFileDownloadRepoName = httpFileRepoName;
     }
 
-    public FileServerHandler(FileChecksumManager checksumManager) {
-        this.root = checksumManager.getRoot();
-        this.checksumManager = checksumManager;
+    public FileServerHandler(FileRepository repository) {
+        this.repository = repository;
+        this.httpFileDownloadServicePort = -1;
+        this.httpFileDownloadRepoName = "";
     }
 
-    public FileDownloadHandler createDownloadTask(String user, String token, List<File> files, String tid) {
-        return new FileDownloadHandler(user, token, files) {
-            @Override
-            public void onGlobalComplete(ChannelHandlerContext ctx) {
-                MCUProtocolV2.sendPacket(ctx, new P32_FileDownloadComplete(tid));
-            }
-        };
+    public FileDownloadHandler createDownloadTask(String user, String token, List<File> files) {
+        return new FileDownloadTask(user, token, files);
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
+        if (packet instanceof P34_UpgradeFileDownloadComplete) {
+            MCUProtocolV2.sendPacket(ctx, new P32_FileDownloadComplete());
+        }
+
         if (packet instanceof P30_FileDownloadRequest request) {
+            if (!this.active.compareAndSet(false, true)) {
+                LOGGER.warn("Rejected overlapping download request from {}, a transfer is already in progress.", ctx.channel().remoteAddress());
+                return;
+            }
+
             var files = request.getFiles();
             var tid = UUID.randomUUID().toString();
             var actualFiles = new ArrayList<File>();
-            var failedFiles = new DownloadFileList();
+            var filesToUpgradeDownload = new HashMap<String, String>();
+            var failedFiles = new HashMap<String, String>();
 
-            for (var channel : files.keySet()) {
-                for (var e : files.get(channel).entrySet()) {
-                    var name = e.getKey();
-                    var hash = e.getValue();
-                    var fileP = this.root.append(name);
-                    var file = fileP.file();
+            for (var resourceId : files.keySet()) {
+                var hash = files.get(resourceId);
+                var file = this.repository.getFile(resourceId);
 
-                    if (!file.exists() || file.length() == 0) {
-                        failedFiles.addFile(channel, name, hash);
-                        continue;
-                    }
-
-                    if (!DiffCheck.compare(hash, this.checksumManager.getFileChecksum(name))) {
-                        failedFiles.addFile(channel, name, hash);
-                        continue;
-                    }
-
-                    actualFiles.add(file);
+                if (!file.exists() || file.length() == 0) {
+                    failedFiles.put(resourceId, hash);
+                    continue;
                 }
+
+                if (!hash.equals(this.repository.getFileInfo(resourceId).getSha256())) {
+                    failedFiles.put(resourceId, hash);
+                    continue;
+                }
+
+                actualFiles.add(file);
+                filesToUpgradeDownload.put(resourceId, hash);
             }
 
             MCUProtocolV2.sendPacket(ctx, new P31_FileDownloadStart(tid, failedFiles));
 
-            if (!actualFiles.isEmpty()) {
-                var task = createDownloadTask("__client__", "__client__", actualFiles, tid);
-                ctx.pipeline().addLast(task);
-                task.push();
-            } else {
-                MCUProtocolV2.sendPacket(ctx, new P32_FileDownloadComplete(tid));
+            if(actualFiles.isEmpty()){
+                MCUProtocolV2.sendPacket(ctx, new P32_FileDownloadComplete());
+                this.active.set(false);
+                return;
             }
+
+            if (this.httpFileDownloadServicePort != -1) {
+                MCUProtocolV2.sendPacket(ctx, new P33_FTPUpgradeToHttp(this.httpFileDownloadServicePort, this.httpFileDownloadRepoName, filesToUpgradeDownload));
+                this.active.set(false);
+                return;
+            }
+
+            var user = String.valueOf(ctx.channel().remoteAddress());
+            var task = createDownloadTask(user, user, actualFiles);
+            ctx.pipeline().addLast(task);
+            task.push();
 
             return;
         }
 
         ctx.fireChannelRead(packet);
+    }
+
+
+    private final class FileDownloadTask extends FileDownloadHandler {
+        public FileDownloadTask(String user, String token, List<File> files) {
+            super(user, token, files);
+        }
+
+        @Override
+        public void onGlobalComplete(ChannelHandlerContext ctx) {
+            FileServerHandler.this.active.set(false);
+            MCUProtocolV2.sendPacket(ctx, new P32_FileDownloadComplete());
+        }
+
+        @Override
+        public void onFileReadStart(File file) {
+            FileServerHandler.this.repository.syncForRead(file);
+            FileServerHandler.this.repository.addReadLock(file, getUser());
+        }
+
+        @Override
+        public void onFileReadComplete(File file) {
+            FileServerHandler.this.repository.removeReadLock(file, getUser());
+        }
     }
 }

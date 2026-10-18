@@ -1,6 +1,7 @@
 package org.atcgroup.mcupdater.util;
 
 import me.gb2022.commons.file.FilePath;
+import org.atcgroup.mcupdater.data.FileInfo;
 
 import java.io.File;
 import java.io.FileInputStream;

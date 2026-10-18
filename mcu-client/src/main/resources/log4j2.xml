@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <properties>
+        <!--Customize-->
+        <property name="date">%d{yyyy-MM-dd HH:mm:ss}</property>
+
+        <!--Line Format-->
+        <property name="line">[${date}] [${level}] %logger: %msg%n%xEx{full}</property>
+        <property name="line_color">[${date}] [${level_color}] %logger: %msg%n%xEx{full}</property>
+
+        <!--Customize-->
+        <property name="date">%d{yyyy-MM-dd HH:mm:ss}</property>
+
+        <!--Line Format-->
+        <property name="log_plugin">[${date}] [%t] [${level}] %logger: %msg%n</property>
+        <property name="log_server">[${date}] [%t] [${level}] Server: %msg%n</property>
+
+        <!--Compose-->
+        <property name="color">{INFO=${color_info}, WARN=${color_warn}, ERROR=${color_err}}</property>
+        <property name="level_color">%-1level{length=1}${color}</property>
+
+        <!--Compose-->
+        <property name="level_color">%-1level{length=1}</property>
+        <property name="level">%-1level{length=1}</property>
+    </properties>
+
+
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${line}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
