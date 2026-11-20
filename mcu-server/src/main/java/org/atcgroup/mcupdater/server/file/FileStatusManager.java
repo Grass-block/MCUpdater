@@ -3,7 +3,7 @@ package org.atcgroup.mcupdater.server.file;
 import me.gb2022.commons.math.SHA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.atcgroup.mcupdater.util.DiffCheck;
+import org.atcgroup.mcupdater.util.FileDigest;
 import org.atcgroup.mcupdater.util.I18n;
 import org.atcgroup.mcupdater.util.FilePaths;
 import org.bukkit.configuration.ConfigurationSection;
@@ -111,7 +111,7 @@ public final class FileStatusManager {
             }
 
             //only case if checksum is match!
-            if (DiffCheck.compare(bytes, hash)) {
+            if (FileDigest.compare(bytes, hash)) {
                 return FileModifyStatus.NONE;
             }
 

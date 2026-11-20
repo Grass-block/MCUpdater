@@ -35,4 +35,6 @@ dependencies {
     compileOnly 'io.netty:netty-codec-http:4.1.119.Final'
 
     implementation gbuildLib('me.gb2022.simpnet:simpnet-base')
+
+    compileOnly 'org.rocksdb:rocksdbjni:11.8.1'
 }

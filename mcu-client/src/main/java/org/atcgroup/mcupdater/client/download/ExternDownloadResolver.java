@@ -5,10 +5,10 @@ import org.atcgroup.mcupdater.UpdateHeader;
 import org.atcgroup.mcupdater.client.ClientError;
 import org.atcgroup.mcupdater.client.ClientFilePath;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
-import org.atcgroup.mcupdater.client.network.RangeDownloader;
+import org.atcgroup.mcupdater.network.RangeDownloader;
 import org.atcgroup.mcupdater.client.ui.component.ExtraTaskCard;
 import org.atcgroup.mcupdater.data.HttpDownloadInfo;
-import org.atcgroup.mcupdater.util.DiffCheck;
+import org.atcgroup.mcupdater.util.FileDigest;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,7 +36,7 @@ public final class ExternDownloadResolver implements DownloadResolver {
         var file = ClientFilePath.CACHE.append(info.getDest()).file();
 
         if (file.exists()) {
-            var sha1 = SHA.byteArrayToHexString(DiffCheck.calculateSHA1(file));
+            var sha1 = SHA.byteArrayToHexString(FileDigest.calculateSHA1(file));
 
             if (sha1.equals(info.getSha1())) {
                 return;
@@ -57,7 +57,7 @@ public final class ExternDownloadResolver implements DownloadResolver {
                 }
         );
 
-        if (!SHA.byteArrayToHexString(DiffCheck.calculateSHA1(file)).equals(info.getSha1())) {
+        if (!SHA.byteArrayToHexString(FileDigest.calculateSHA1(file)).equals(info.getSha1())) {
             download(info);
         }
 

@@ -1,0 +1,62 @@
+config:
+  server-address: 127.0.0.1 #服务器绑定的地址，一般不动
+  server-port: 65321 #服务器网络端口
+  debug: false #是否输出调试内容, 若要反馈bug请打开此选项
+  patch-slice-size: 32768 #发送更新数据包时的切片的大小(可选)
+  rate-delay: 1 #响应网络时的速度限制(ms)
+
+  #文件分析器
+  file-analyzer:
+    order: [ "modrinth","curseforge","fallback" ] #分析器顺序，不需要的可以直接移出这个表
+    modrinth:
+      base-url: "api.modrinth.com/v2"
+      detect-ext-name: [ "zip","jar" ]
+    curseforge:
+      base-url: "api.curseforge.com/v1"
+      detect-ext-name: [ "zip","jar" ]
+      user-token: "YOUR_CF_API_TOKEN"
+    fallback:
+      compress-threshold: 268435456 #对大于一定大小的文件不再压缩以减少不必要的处理时间
+
+  cdn-service:
+    s3-cdn:
+      enable: false
+      endpoint: "https://s3.example.com"
+      bucket: "s3-example-bucket"
+      access-key-id: "s3-access-key"
+      access-key-secret: "s3-secret-access-key"
+      download-endpoint: "https://cdn.example.com/mcu-cdn"
+      resource-prefix: "/test-server"
+      region: "east-1"
+    mcu-cdn:
+      enable: false
+      address: cdn.example.com #目标CDN服务器的地址，客户端和服务端都会连接并上传下载文件。
+      port: 63000
+      access-token: cdn@vc_a2#test #用于上传权限的token
+      repository: test #在CDN服务上，你的前置路径
+      upload-rate-delay: 1 #上传速度限制(ms/pps)
+
+  channels:
+    base:
+      required: true
+      name: { "zh_cn": "基础游戏资源" }
+      desc: { "zh_cn": "核心游戏资源，全部游戏模式基础资源" }
+      path: "D:/[65300]mcu/source/base"
+
+    tcraft-main:
+      required: false
+      name: { "zh_cn": "创造玩法游戏资源" }
+      path: "D:/[25571]tcraft-4"
+      conflict: base
+      filter-reject: ["/"]
+      filter-add: ["/mods/"]
+      filter-block: [ "/mods/[S]" ]
+
+    guns-main:
+      required: false
+      name: { "zh_cn": "生存玩法游戏资源" }
+      path: "D:/[25572]atmod-5"
+      conflict: base
+      filter-reject: [ "/" ]
+      filter-add: [ "/mods/" ]
+      filter-block: [ "/mods/[S]" ]

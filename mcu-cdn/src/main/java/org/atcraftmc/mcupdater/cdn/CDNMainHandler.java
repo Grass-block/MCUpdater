@@ -9,7 +9,7 @@ import org.atcgroup.mcupdater.network.packet.P02_CDNHandShake;
 import org.atcgroup.mcupdater.network.packet.P03_CDNHandShakeResponse;
 import org.atcgroup.mcupdater.network.packet.P40_CDNFileCheckRequest;
 import org.atcgroup.mcupdater.network.packet.P41_CDNFileCheckResult;
-import org.atcgroup.mcupdater.util.DiffCheck;
+import org.atcgroup.mcupdater.util.FileDigest;
 
 public final class CDNMainHandler extends PacketInboundHandler {
     private final int upgradeHttpPort;
@@ -44,7 +44,7 @@ public final class CDNMainHandler extends PacketInboundHandler {
                     continue;
                 }
 
-                if (DiffCheck.compare(remoteHashes, localHashes.getSha1Raw())) {
+                if (FileDigest.compare(remoteHashes, localHashes.getSha1Raw())) {
                     continue;
                 }
 

@@ -1,7 +1,6 @@
 package org.atcgroup.mcupdater.util;
 
 import me.gb2022.commons.file.FilePath;
-import org.atcgroup.mcupdater.data.FileInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,7 +38,7 @@ public final class FileChecksumManager {
             }
         }
 
-        var sum = DiffCheck.calculateSHA256(file);
+        var sum = FileDigest.calculateSHA256(file);
 
         this.checksums.put(path, sum);
 

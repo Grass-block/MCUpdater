@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.data.HttpDownloadInfo;
 import org.atcgroup.mcupdater.data.VersionInfo;
-import org.atcgroup.mcupdater.util.DiffCheck;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;
@@ -16,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 //ok啊小小测试一把
 //走你

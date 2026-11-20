@@ -17,7 +17,7 @@ import org.atcgroup.mcupdater.server.analyzer.PackCompressHandler;
 import org.atcgroup.mcupdater.server.analyzer.VersionFileAnalyzer;
 import org.atcgroup.mcupdater.server.file.FileModifyStatus;
 import org.atcgroup.mcupdater.server.file.FileSource;
-import org.atcgroup.mcupdater.util.DiffCheck;
+import org.atcgroup.mcupdater.util.FileDigest;
 import org.atcgroup.mcupdater.util.FilePaths;
 import org.atcgroup.mcupdater.util.I18n;
 import org.atcgroup.mcupdater.util.Pipeline;
@@ -377,7 +377,7 @@ public final class VersionService implements Service {
 
         for (var path : files.keySet()) {
             var file = files.get(path);
-            var sha1 = DiffCheck.calculateSHA1(file);
+            var sha1 = FileDigest.calculateSHA1(file);
 
             data.add(new VersionFileAnalyzer.SourceFileInfo(path, file, sha1));
         }

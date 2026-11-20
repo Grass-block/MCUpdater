@@ -1,7 +1,7 @@
 package org.atcgroup.mcupdater.data;
 
 import me.gb2022.commons.math.SHA;
-import org.atcgroup.mcupdater.util.DiffCheck;
+import org.atcgroup.mcupdater.util.FileDigest;
 
 import java.io.File;
 import java.util.HexFormat;
@@ -14,8 +14,8 @@ public final class FileInfo {
     private final String sha256;
 
     public static FileInfo calculateOf(File file) {
-        var sha256 = SHA.byteArrayToHexString(DiffCheck.calculateSHA256(file));
-        var sha1 = SHA.byteArrayToHexString(DiffCheck.calculateSHA1(file));
+        var sha256 = SHA.byteArrayToHexString(FileDigest.calculateSHA256(file));
+        var sha1 = SHA.byteArrayToHexString(FileDigest.calculateSHA1(file));
 
         if(!file.exists()) {
             return null;

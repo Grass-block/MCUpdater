@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.client.network;
+package org.atcgroup.mcupdater.network;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,13 +29,39 @@ public final class RangeDownloader implements AutoCloseable {
     private final HttpClient client;
     private final int threads;
     private final long chunkSize;
+    private final Set<InputStream> activeStreams = ConcurrentHashMap.newKeySet();
+    private volatile boolean closed;
+
+    private HttpResponse.BodyHandler<InputStream> streamingBody() {
+        return info -> HttpResponse.BodySubscribers.mapping(HttpResponse.BodySubscribers.ofInputStream(), stream -> {
+            var tracked = new java.io.FilterInputStream(stream) {
+                @Override
+                public void close() throws IOException {
+                    try {
+                        super.close();
+                    } finally {
+                        activeStreams.remove(this);
+                    }
+                }
+            };
+            this.activeStreams.add(tracked);
+            if (this.closed) {
+                try {
+                    tracked.close();
+                } catch (IOException ignored) {
+                }
+            }
+            return tracked;
+        });
+    }
 
     public RangeDownloader() {
-        this(DEFAULT_TOTAL_THREADS, DEFAULT_THREADS, DEFAULT_CHUNK_SIZE);
+        this(DEFAULT_THREADS, DEFAULT_TOTAL_THREADS, DEFAULT_CHUNK_SIZE);
     }
 
     public RangeDownloader(int threads, int totalThreads, long chunkSize) {
         if (threads <= 0) throw new IllegalArgumentException("threads must be > 0");
+        if (totalThreads <= 0) throw new IllegalArgumentException("totalThreads must be > 0");
 
         if (chunkSize <= 0) throw new IllegalArgumentException("chunkSize must be > 0");
 
@@ -57,6 +83,7 @@ public final class RangeDownloader implements AutoCloseable {
         Objects.requireNonNull(url);
         Objects.requireNonNull(target);
         Objects.requireNonNull(progress);
+        if (this.closed) throw new IOException("Downloader closed");
 
         Files.createDirectories(target.toAbsolutePath().getParent());
         Path partFile = target.resolveSibling(target.getFileName() + ".part");
@@ -108,7 +135,7 @@ public final class RangeDownloader implements AutoCloseable {
      */
     private FileInfo probe(String url) throws IOException, InterruptedException {
         var request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(30)).header("Range", "bytes=0-1").GET().build();
-        var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        var response = client.send(request, streamingBody());
 
         try (var ignored = response.body()) {
             var status = response.statusCode();
@@ -124,6 +151,10 @@ public final class RangeDownloader implements AutoCloseable {
                 long total = parseTotalSize(contentRange);
 
                 return new FileInfo(total, true);
+            }
+
+            if (status == 416 && "bytes */0".equals(response.headers().firstValue("Content-Range").orElse(""))) {
+                return new FileInfo(0, false);
             }
 
             /*
@@ -235,22 +266,34 @@ public final class RangeDownloader implements AutoCloseable {
         }
 
         var futures = new ArrayList<Future<?>>();
+        var gate = new Object();
+        var stopping = new java.util.concurrent.atomic.AtomicBoolean();
+        var running = new Phaser(1);
 
         try {
             for (int i = 0; i < Math.min(this.threads, queue.size()); i++) {
                 futures.add(this.executor.submit(() -> {
-                    while (true) {
-                        var chunk = queue.poll();
+                    synchronized (gate) {
+                        if (stopping.get()) return;
+                        running.register();
+                    }
+                    try {
+                        while (true) {
+                            if (Thread.currentThread().isInterrupted() || stopping.get()) return;
+                            var chunk = queue.poll();
 
-                        if (chunk == null) {
-                            return;
-                        }
+                            if (chunk == null) {
+                                return;
+                            }
 
-                        try {
-                            downloadChunk(url, partFile, state, chunk, downloaded, total, progress);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            try {
+                                downloadChunk(url, partFile, state, chunk, downloaded, total, progress);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
+                    } finally {
+                        running.arriveAndDeregister();
                     }
                 }));
             }
@@ -275,6 +318,12 @@ public final class RangeDownloader implements AutoCloseable {
             }
 
         } finally {
+            synchronized (gate) {
+                stopping.set(true);
+            }
+            futures.forEach(future -> future.cancel(true));
+            // Wait for actual IO completion before a caller cleans staging files.
+            running.arriveAndAwaitAdvance();
             /*
              * 即使失败，也保存当前状态。
              */
@@ -293,6 +342,7 @@ public final class RangeDownloader implements AutoCloseable {
         IOException lastException = null;
 
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            if (Thread.currentThread().isInterrupted()) throw new IOException("Download interrupted");
 
             try {
 
@@ -340,7 +390,7 @@ public final class RangeDownloader implements AutoCloseable {
 
         try {
 
-            response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            response = client.send(request, streamingBody());
 
         } catch (InterruptedException e) {
 
@@ -361,11 +411,10 @@ public final class RangeDownloader implements AutoCloseable {
             throw new IOException("Expected HTTP 206, got " + status);
         }
 
-        validateContentRange(response, requestStart, chunk.end);
-
         try (InputStream input = response.body();
 
              RandomAccessFile raf = new RandomAccessFile(partFile.toFile(), "rw")) {
+            validateContentRange(response, requestStart, chunk.end);
 
             raf.seek(requestStart);
 
@@ -488,7 +537,7 @@ public final class RangeDownloader implements AutoCloseable {
 
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofMinutes(30)).header("Accept-Encoding", "identity").GET().build();
 
-        HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        HttpResponse<InputStream> response = client.send(request, streamingBody());
 
         if (response.statusCode() / 100 != 2) {
 
@@ -509,6 +558,7 @@ public final class RangeDownloader implements AutoCloseable {
 
             while ((read = input.read(buffer)) != -1) {
 
+                if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Download interrupted");
                 output.write(buffer, 0, read);
 
                 downloaded += read;
@@ -531,14 +581,10 @@ public final class RangeDownloader implements AutoCloseable {
 
     private void finish(Path partFile, Path target, Path resumeFile) throws IOException {
 
-        /*
-         * 如果目标文件已经存在，先删除。
-         */
-        Files.deleteIfExists(target);
-
+        // Replace on move, so a failed move does not first delete the previous target.
         try {
 
-            Files.move(partFile, target, StandardCopyOption.ATOMIC_MOVE);
+            Files.move(partFile, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 
         } catch (AtomicMoveNotSupportedException e) {
 
@@ -552,7 +598,14 @@ public final class RangeDownloader implements AutoCloseable {
 
     @Override
     public void close() {
-        this.executor.shutdown();
+        this.closed = true;
+        this.executor.shutdownNow();
+        for (var stream : this.activeStreams) {
+            try {
+                stream.close();
+            } catch (IOException ignored) {
+            }
+        }
     }
 
     // ---------------------------------------------------------------------

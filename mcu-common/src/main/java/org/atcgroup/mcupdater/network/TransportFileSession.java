@@ -2,7 +2,7 @@ package org.atcgroup.mcupdater.network;
 
 import org.atcgroup.mcupdater.network.packet.P70_FTPHeader;
 import org.atcgroup.mcupdater.network.packet.P71_FTPPayload;
-import org.atcgroup.mcupdater.util.DiffCheck;
+import org.atcgroup.mcupdater.util.FileDigest;
 
 import java.io.Closeable;
 import java.io.File;
@@ -23,7 +23,7 @@ public final class TransportFileSession implements Closeable {
         this.randomAccessFile = new RandomAccessFile(file, "rw");
         this.totalPackets = (long) Math.ceil((double) file.length() / MCUProtocolV2.CDN_PAYLOAD_SIZE);
         this.length = file.length();
-        this.sha256 = DiffCheck.calculateSHA256(file);
+        this.sha256 = FileDigest.calculateSHA256(file);
     }
 
     @Override

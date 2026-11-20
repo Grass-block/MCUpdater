@@ -1,7 +1,6 @@
 package org.atcgroup.mcupdater.network.handler;
 
 import io.netty.channel.ChannelHandlerContext;
-import me.gb2022.commons.math.SHA;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.apache.logging.log4j.LogManager;
@@ -11,7 +10,7 @@ import org.atcgroup.mcupdater.network.packet.P70_FTPHeader;
 import org.atcgroup.mcupdater.network.packet.P71_FTPPayload;
 import org.atcgroup.mcupdater.network.packet.P74_FTPComplete;
 import org.atcgroup.mcupdater.network.packet.P75_FTPCompleteResponse;
-import org.atcgroup.mcupdater.util.DiffCheck;
+import org.atcgroup.mcupdater.util.FileDigest;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -86,7 +85,7 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
         }
 
         if (packet instanceof P74_FTPComplete) {
-            var targetSHA256 = DiffCheck.calculateSHA256(this.file);
+            var targetSHA256 = FileDigest.calculateSHA256(this.file);
 
             if (this.len != this.randomAccessFile.length()) {
                 LOGGER.warn("{} failed - length mismatch - {}/{}", this.file.getName(), randomAccessFile.length(), this.len);
@@ -94,7 +93,7 @@ public abstract class FileReceiveHandler extends PacketInboundHandler {
                 return;
             }
 
-            if (!DiffCheck.compare(targetSHA256, this.sha256)) {
+            if (!FileDigest.compare(targetSHA256, this.sha256)) {
                 LOGGER.warn("{} failed - SHA256 mismatch!", this.file.getName());
                 MCUProtocolV2.sendPacket(ctx, new P75_FTPCompleteResponse(false));
                 return;

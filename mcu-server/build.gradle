@@ -17,6 +17,9 @@ repositories {
 }
 
 dependencies {
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation gbuildLib("me.gb2022.commons:commons-nbt")
     implementation gbuildLib("me.gb2022.commons:commons-math")
     implementation gbuildLib("me.gb2022.commons:commons-container")
@@ -24,6 +27,7 @@ dependencies {
     implementation gbuildLib("me.gb2022.commons:commons-event")
 
     implementation 'com.google.code.gson:gson:2.12.1'
+    implementation 'org.iq80.leveldb:leveldb:0.12'
 
     implementation project(":mcu-common")
 
@@ -43,6 +47,13 @@ dependencies {
     implementation platform("software.amazon.awssdk:bom:2.55.4")
     implementation "software.amazon.awssdk:s3"
     implementation "software.amazon.awssdk:s3-transfer-manager"
+
+
+
+}
+
+test {
+    useJUnitPlatform()
 }
 
 jar{
