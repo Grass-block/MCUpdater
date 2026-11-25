@@ -1,0 +1,37 @@
+config:
+  resource-server:
+    http-enabled: true
+    http-port: 9178
+    http-endpoint: "http://localhost:9178"
+    bftp-max-worker: 16
+  cdn-config:
+    s3-cdn:
+      enable: false
+      endpoint: "https://s3.example.com"
+      bucket: "s3-example-bucket"
+      access-key-id: "s3-access-key"
+      access-key-secret: "s3-secret-access-key"
+      download-endpoint: "https://cdn.example.com/mcu-cdn"
+      resource-prefix: "/test-server"
+      region: "east-1"
+    mcu-cdn:
+      enable: false
+      address: cdn.example.com #target open port of cdn server.
+      port: 63000
+      cdn-account: 'test-server1'
+      cdn-access-token: 'example_access_token_1'
+  file-analyzers:
+    order: [ "modrinth" ]
+    modrinth:
+      base-url: "api.modrinth.com/v2"
+      detect-ext-name: [ "zip","jar" ]
+  channels:
+    server:
+      required: true #是否强制安装，不填写默认为false
+      name: 服务端资源(默认)
+      desc: 默认的服务端核心玩法资源。
+      path: "E:/Java/Projects/MCUpdater/test/server/instance"
+      filter-block: [ ] #优先于所有屏蔽器的强制屏蔽，选填
+      filter-reject: [ '/' ]
+      filter-add: #允许的路径前缀，最后执行（优先级高于拒绝）
+        - "/mods"

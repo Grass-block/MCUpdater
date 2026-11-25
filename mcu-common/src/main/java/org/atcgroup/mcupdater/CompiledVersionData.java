@@ -1,9 +1,10 @@
 package org.atcgroup.mcupdater;
 
-import com.google.gson.JsonObject;
-import org.atcgroup.mcupdater.data.VersionInfo;
+import io.netty.buffer.ByteBuf;
+import me.gb2022.simpnet.util.BufferUtil;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class CompiledVersionData {
     private final Map<String, String> elapsedUpdateLogs = new HashMap<>();
@@ -17,12 +18,34 @@ public final class CompiledVersionData {
         this.headTimeStamp = headTimeStamp;
     }
 
+    public CompiledVersionData(ByteBuf buffer) {
+        this.channel = BufferUtil.readString(buffer);
+        this.channelDisplayName = BufferUtil.readString(buffer);
+        this.headTimeStamp = buffer.readLong();
+
+        var logLen = buffer.readInt();
+        for (var j = 0; j < logLen; j++) {
+            addElapsedUpdateLog(BufferUtil.readString(buffer), BufferUtil.readString(buffer));
+        }
+    }
+
+    public void write(ByteBuf buffer) {
+        BufferUtil.writeString(buffer, this.channel);
+        BufferUtil.writeString(buffer, this.channelDisplayName);
+        buffer.writeLong(this.headTimeStamp);
+        buffer.writeInt(this.elapsedUpdateLogs.size());
+        for (Map.Entry<String, String> entry : this.elapsedUpdateLogs.entrySet()) {
+            BufferUtil.writeString(buffer, entry.getKey());
+            BufferUtil.writeString(buffer, entry.getValue());
+        }
+    }
+
     public String getChannel() {
         return channel;
     }
 
-    public void addElapsedUpdateLog(String version,String log){
-        this.elapsedUpdateLogs.put(version,log);
+    public void addElapsedUpdateLog(String version, String log) {
+        this.elapsedUpdateLogs.put(version, log);
     }
 
     public Map<String, String> getElapsedUpdateLogs() {
@@ -35,18 +58,5 @@ public final class CompiledVersionData {
 
     public String getChannelDisplayName() {
         return channelDisplayName;
-    }
-
-    public JsonObject toJson() {
-        var dom = new JsonObject();
-        dom.addProperty("channel", this.channel);
-        dom.addProperty("channelDisplayName", this.channelDisplayName);
-        dom.addProperty("headTimeStamp", this.headTimeStamp);
-        var m_logs = new JsonObject();
-        for (var e : this.elapsedUpdateLogs.entrySet()) {
-            m_logs.addProperty(e.getKey(), e.getValue());
-        }
-        dom.add("elapsedUpdateLogs", m_logs);
-        return dom;
     }
 }

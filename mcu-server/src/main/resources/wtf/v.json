@@ -1,0 +1,24 @@
+{
+  "channel": "server",
+  "version": "initial",
+  "timestamp": 1790660497903,
+  "_assets": [
+  ],
+  "assets": {
+    "9a40f949ec9794cdef79bdabb61a12a918613194": {
+      "provider": "server"
+    },
+    "f9ba7397f0cb6d53af088d873cb9bd494c155782": {
+      "provider": "http",
+      "url": "https://example/com/file/test",
+      "length": 350234
+    }
+  },
+  "extract": [],
+  "update": {
+    "/config/test1.cfg": "9a40f949ec9794cdef79bdabb61a12a918613194"
+  },
+  "delete": [
+    "/config/delete.cfg"
+  ]
+}

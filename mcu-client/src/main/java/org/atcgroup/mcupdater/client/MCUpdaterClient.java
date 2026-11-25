@@ -1,5 +1,10 @@
 package org.atcgroup.mcupdater.client;
 
+import me.gb2022.mcupdater.client.ClientError;
+import me.gb2022.mcupdater.client.ClientVersionRecord;
+import me.gb2022.mcupdater.client.ClientConfig;
+import me.gb2022.mcupdater.client.ui.desktop.NotificationService;
+import me.gb2022.mcupdater.client.ui.desktop.screen.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.UpdateHeader;
@@ -7,8 +12,6 @@ import org.atcgroup.mcupdater.client.download.DownloadResolver;
 import org.atcgroup.mcupdater.client.download.DownloadResult;
 import org.atcgroup.mcupdater.client.network.ClientNetworkService;
 import org.atcgroup.mcupdater.client.ui.MainWindow;
-import org.atcgroup.mcupdater.client.ui.screen.*;
-import org.atcgroup.mcupdater.client.util.NotificationService;
 import org.atcgroup.mcupdater.data.ServerMeta;
 import org.atcgroup.mcupdater.network.packet.*;
 import org.atcgroup.mcupdater.util.AsyncLock;
@@ -21,11 +24,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class MCUpdaterClient {
     public static final Logger LOGGER = LogManager.getLogger("MCU/Client");
-    public static final MCUpdaterClient INSTANCE = new MCUpdaterClient();
+    //public static final MCUpdaterClient INSTANCE = new MCUpdaterClient();
     public static final ExecutorService BACKGROUND_EXEC = Executors.newFixedThreadPool(12);
 
-    private final ClientInstallationInfo info = new ClientInstallationInfo();
-    private final Config config = new Config();
+    private final ClientVersionRecord info = new ClientVersionRecord();
+    private final ClientConfig config = new ClientConfig();
     private final ClientNetworkService networkService = new ClientNetworkService(this);
     private final MainWindow window = new MainWindow(this);
     private final ProcessScreen processScreen = new ProcessScreen();
@@ -36,7 +39,7 @@ public final class MCUpdaterClient {
     private boolean isErrored = false;
 
     public static MCUpdaterClient instance() {
-        return INSTANCE;
+        return null;
     }
 
     //client action
@@ -48,7 +51,7 @@ public final class MCUpdaterClient {
         }
 
         this.window.init();
-        this.window.setScreen(new StartScreen());
+        //this.window.setScreen(new StartScreen());
 
         this.info.load();
         this.networkService.run(this.config.service());
@@ -79,7 +82,7 @@ public final class MCUpdaterClient {
 
     //client reaction
     public void handleConnected(P01_ServerHello message) {
-        if(this.isErrored) {
+        if (this.isErrored) {
             return;
         }
         LOGGER.info("server: " + message);
@@ -88,7 +91,7 @@ public final class MCUpdaterClient {
         if (this.info.isInvalid()) {
             try {
                 this.window.setScreen(new WelcomeScreen(this::requestConfig));
-            }catch (Throwable e){
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
             return;
@@ -149,7 +152,7 @@ public final class MCUpdaterClient {
 
 
     public void handleUpdaterHeaderReceived(P21_VersionHeaders headers) {
-        if(this.isErrored) {
+        if (this.isErrored) {
             return;
         }
 
@@ -163,7 +166,7 @@ public final class MCUpdaterClient {
     }
 
     public void handleResourceDownloadComplete() {
-        if(this.isErrored) {
+        if (this.isErrored) {
             return;
         }
 
@@ -178,7 +181,7 @@ public final class MCUpdaterClient {
     }
 
     public void completeUpdate() {
-        if(this.isErrored) {
+        if (this.isErrored) {
             return;
         }
         for (var v : this.header.getVersions()) {
@@ -202,10 +205,10 @@ public final class MCUpdaterClient {
     }
 
     public void handleConfigReceived(P20_ChannelHeaders message) {
-        if(this.isErrored) {
+        if (this.isErrored) {
             return;
         }
-        this.window.setScreen(new InstallConfigScreen(message.getMetas(), this::startUpdate));
+        //this.window.setScreen(new InstallConfigScreen(message.getMetas(),info, this::startUpdate));
     }
 
     public void handleException(ClientError eventId, Exception e) {
@@ -219,12 +222,12 @@ public final class MCUpdaterClient {
 
         e.printStackTrace();
 
-        this.window.setScreen(new ErrorScreen(error));
+        //this.window.setScreen(new ErrorScreen(error));
         this.networkService.shutdown();
     }
 
 
-    public ClientInstallationInfo getClientInfo() {
+    public ClientVersionRecord getClientInfo() {
         return info;
     }
 
@@ -240,7 +243,7 @@ public final class MCUpdaterClient {
         this.lock.monitor();
     }
 
-    public Config config() {
+    public ClientConfig config() {
         return this.config;
     }
 

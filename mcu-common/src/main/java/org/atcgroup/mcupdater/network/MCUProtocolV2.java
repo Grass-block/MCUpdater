@@ -1,8 +1,5 @@
 package org.atcgroup.mcupdater.network;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import me.gb2022.simpnet.channel.NettyChannelInitializer;
 import me.gb2022.simpnet.packet.Packet;
@@ -55,31 +52,6 @@ public interface MCUProtocolV2 {
             }
         });
     }
-
-    static void serverOptions(ServerBootstrap b) {
-        b.option(ChannelOption.SO_BACKLOG, 1024);
-        b.option(ChannelOption.SO_REUSEADDR, true);
-
-        b.childOption(ChannelOption.TCP_NODELAY, true);
-        b.childOption(ChannelOption.SO_KEEPALIVE, true);
-        b.childOption(ChannelOption.SO_RCVBUF, 1024 * 1024);
-        b.childOption(ChannelOption.SO_SNDBUF, 1024 * 1024);
-        b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-        b.childOption(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(16 * 1024, 64 * 1024, 256 * 1024));
-        b.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(64 * 1024, 256 * 1024));
-    }
-
-    static void clientOptions(Bootstrap b) {
-        b.option(ChannelOption.SO_REUSEADDR, true);
-        b.option(ChannelOption.TCP_NODELAY, true);
-        b.option(ChannelOption.SO_KEEPALIVE, true);
-        b.option(ChannelOption.SO_RCVBUF, 1024 * 1024);
-        b.option(ChannelOption.SO_SNDBUF, 1024 * 1024);
-        b.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-        b.option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(16 * 1024, 64 * 1024, 256 * 1024));
-        b.option(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(64 * 1024, 256 * 1024));
-    }
-
 
     static NettyChannelInitializer initializer() {
         return new NettyChannelInitializer().config((i) -> {

@@ -1,7 +1,7 @@
 package org.atcgroup.mcupdater.client.download;
 
 import org.atcgroup.mcupdater.UpdateHeader;
-import org.atcgroup.mcupdater.client.ClientError;
+import me.gb2022.mcupdater.client.ClientError;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
 import org.atcgroup.mcupdater.client.network.CDNClient;
 import org.atcgroup.mcupdater.network.packet.P30_FileDownloadRequest;

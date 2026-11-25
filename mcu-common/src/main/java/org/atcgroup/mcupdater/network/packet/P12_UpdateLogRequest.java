@@ -25,4 +25,6 @@ public final class P12_UpdateLogRequest implements Packet {
     public VersionSet getVersions() {
         return versionSet;
     }
+
+
 }

@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
 import org.atcgroup.mcupdater.network.handler.FileDownloadHandler;
 import org.atcgroup.mcupdater.network.packet.*;
-import org.atcgroup.mcupdater.server.v4.storage.CASResourceStorage;
+import me.gb2022.mcupdater.storage.CASResourceStorage;
 
 import java.io.File;
 import java.util.ArrayList;

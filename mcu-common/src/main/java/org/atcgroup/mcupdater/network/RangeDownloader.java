@@ -94,14 +94,18 @@ public final class RangeDownloader implements AutoCloseable {
         var attempt = 0;
 
         while (true) {
+            if (this.closed || Thread.currentThread().isInterrupted()) throw new InterruptedException("Download cancelled");
             try {
                 info = probe(url);
                 break;
             } catch (IOException e) {
+                if (this.closed || Thread.currentThread().isInterrupted()) {
+                    throw new InterruptedException("Download cancelled");
+                }
                 attempt++;
-                LOGGER.warn("[RangeDownloader] Probe failed (attempt {}/3): {}", attempt, e.getMessage());
+                LOGGER.warn("[RangeDownloader] Probe failed for {} (attempt {}/{}): {}", url, attempt, MAX_RETRIES, failureReason(e));
 
-                if (attempt <= 3) {
+                if (attempt < MAX_RETRIES) {
                     Thread.sleep(500L * attempt);
                     continue;
                 }
@@ -119,6 +123,12 @@ public final class RangeDownloader implements AutoCloseable {
         }
 
         rangeDownload(url, target, partFile, resumeFile, info, progress);
+    }
+
+    private static String failureReason(Throwable error) {
+        var cause = error;
+        while (cause.getCause() != null && cause.getCause() != cause) cause = cause.getCause();
+        return cause.toString();
     }
 
     /**
@@ -342,7 +352,7 @@ public final class RangeDownloader implements AutoCloseable {
         IOException lastException = null;
 
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-            if (Thread.currentThread().isInterrupted()) throw new IOException("Download interrupted");
+            if (this.closed || Thread.currentThread().isInterrupted()) throw new IOException("Download cancelled");
 
             try {
 
@@ -351,10 +361,12 @@ public final class RangeDownloader implements AutoCloseable {
                 return;
 
             } catch (IOException e) {
+                // Closing an active response stream is expected during cancellation, not a retryable failure.
+                if (this.closed || Thread.currentThread().isInterrupted()) throw e;
 
                 lastException = e;
 
-                LOGGER.warn("[RangeDownloader] Chunk {} failed (attempt {}/{}): {}", chunk.index, attempt, MAX_RETRIES, e.getMessage());
+                LOGGER.warn("[RangeDownloader] Chunk {} failed for {} (attempt {}/{}): {}", chunk.index, url, attempt, MAX_RETRIES, failureReason(e));
 
                 if (attempt < MAX_RETRIES) {
 
@@ -654,17 +666,15 @@ public final class RangeDownloader implements AutoCloseable {
         }
 
         static ResumeState load(Path resumeFile, String url, long totalSize, long chunkSize, int chunkCount) throws IOException {
-
-            ResumeState state = new ResumeState(url, totalSize, chunkSize, chunkCount, resumeFile);
+            var state = new ResumeState(url, totalSize, chunkSize, chunkCount, resumeFile);
 
             if (!Files.exists(resumeFile)) {
                 return state;
             }
 
-            Properties properties = new Properties();
+            var properties = new Properties();
 
-            try (InputStream input = Files.newInputStream(resumeFile)) {
-
+            try (var input = Files.newInputStream(resumeFile)) {
                 properties.load(input);
             }
 
@@ -685,9 +695,7 @@ public final class RangeDownloader implements AutoCloseable {
             }
 
             for (int i = 0; i < chunkCount; i++) {
-
                 state.downloaded[i] = Long.parseLong(properties.getProperty("chunk." + i + ".downloaded", "0"));
-
                 state.completed[i] = Boolean.parseBoolean(properties.getProperty("chunk." + i + ".completed", "false"));
             }
 
@@ -695,70 +703,53 @@ public final class RangeDownloader implements AutoCloseable {
         }
 
         synchronized void save(Path file) throws IOException {
-
-            Properties properties = new Properties();
+            var properties = new Properties();
 
             properties.setProperty("url", url);
-
             properties.setProperty("totalSize", Long.toString(totalSize));
-
             properties.setProperty("chunkSize", Long.toString(chunkSize));
 
             for (int i = 0; i < downloaded.length; i++) {
-
                 properties.setProperty("chunk." + i + ".downloaded", Long.toString(downloaded[i]));
-
                 properties.setProperty("chunk." + i + ".completed", Boolean.toString(completed[i]));
             }
 
-            Path temp = file.resolveSibling(file.getFileName() + ".tmp");
+            var temp = file.resolveSibling(file.getFileName() + ".tmp");
 
             try (OutputStream output = Files.newOutputStream(temp, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-
                 properties.store(output, "RangeDownloader resume state");
             }
 
             try {
-
                 Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-
             } catch (AtomicMoveNotSupportedException e) {
-
                 Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING);
             }
         }
 
         synchronized void reset() {
-
             Arrays.fill(downloaded, 0);
-
             Arrays.fill(completed, false);
         }
 
         synchronized long getDownloaded(int chunk) {
-
             return downloaded[chunk];
         }
 
         synchronized void addDownloaded(int chunk, long amount) {
-
             downloaded[chunk] += amount;
         }
 
         synchronized void markCompleted(int chunk) {
-
             completed[chunk] = true;
         }
 
         synchronized boolean isCompleted(int chunk) {
-
             return completed[chunk];
         }
 
         synchronized boolean allCompleted() {
-
             for (boolean value : completed) {
-
                 if (!value) return false;
             }
 
@@ -766,7 +757,6 @@ public final class RangeDownloader implements AutoCloseable {
         }
 
         synchronized long totalDownloaded() {
-
             long result = 0;
 
             for (long value : downloaded) {

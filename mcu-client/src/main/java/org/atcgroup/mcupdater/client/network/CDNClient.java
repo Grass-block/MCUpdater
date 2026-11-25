@@ -4,10 +4,11 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import me.gb2022.mcupdater.protocol.MCUProtocol;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.atcgroup.mcupdater.UpdateHeader;
-import org.atcgroup.mcupdater.client.ClientError;
+import me.gb2022.mcupdater.client.ClientError;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
 import org.atcgroup.mcupdater.network.ErrorCatchHandler;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
@@ -37,7 +38,7 @@ public final class CDNClient extends PacketInboundHandler {
         var group = new NioEventLoopGroup();
         var bootstrap = new Bootstrap();
 
-        MCUProtocolV2.clientOptions(bootstrap);
+        MCUProtocol.clientOptions(bootstrap);
 
         bootstrap.group(group);
         bootstrap.channel(NioSocketChannel.class);

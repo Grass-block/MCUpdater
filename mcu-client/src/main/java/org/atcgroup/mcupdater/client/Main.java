@@ -3,8 +3,8 @@ package org.atcgroup.mcupdater.client;
 import com.formdev.flatlaf.FlatLightLaf;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.atcgroup.mcupdater.client.util.ApplicationEntry;
-import org.atcgroup.mcupdater.client.util.NotificationService;
+import me.gb2022.mcupdater.client.util.ApplicationEntry;
+import me.gb2022.mcupdater.client.ui.desktop.NotificationService;
 import org.atcgroup.mcupdater.util.FilePaths;
 
 import javax.swing.*;
@@ -36,7 +36,7 @@ public interface Main {
             LOGGER.error("config file does not exist.");
         }
 
-        MCUpdaterClient.INSTANCE.start();
+        //MCUpdaterClient.INSTANCE.start();
     }
 
     static void theme() {

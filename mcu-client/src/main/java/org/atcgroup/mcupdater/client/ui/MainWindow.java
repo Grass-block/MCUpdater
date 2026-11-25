@@ -1,8 +1,9 @@
 package org.atcgroup.mcupdater.client.ui;
 
 
+import me.gb2022.mcupdater.client.ui.desktop.UI;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
-import org.atcgroup.mcupdater.client.ui.screen.Screen;
+import me.gb2022.mcupdater.client.ui.desktop.screen.Screen;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;

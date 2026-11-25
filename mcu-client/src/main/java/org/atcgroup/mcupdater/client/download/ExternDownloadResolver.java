@@ -2,11 +2,11 @@ package org.atcgroup.mcupdater.client.download;
 
 import me.gb2022.commons.math.SHA;
 import org.atcgroup.mcupdater.UpdateHeader;
-import org.atcgroup.mcupdater.client.ClientError;
-import org.atcgroup.mcupdater.client.ClientFilePath;
+import me.gb2022.mcupdater.client.ClientError;
+import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
 import org.atcgroup.mcupdater.network.RangeDownloader;
-import org.atcgroup.mcupdater.client.ui.component.ExtraTaskCard;
+import me.gb2022.mcupdater.client.ui.desktop.component.ExtraTaskCard;
 import org.atcgroup.mcupdater.data.HttpDownloadInfo;
 import org.atcgroup.mcupdater.util.FileDigest;
 

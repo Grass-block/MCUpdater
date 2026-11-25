@@ -3,9 +3,9 @@ package org.atcgroup.mcupdater.client.download;
 import me.gb2022.commons.file.FilePath;
 import org.atcgroup.mcupdater.PatchFile;
 import org.atcgroup.mcupdater.UpdateHeader;
-import org.atcgroup.mcupdater.client.ClientFilePath;
+import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.atcgroup.mcupdater.client.ui.TaskListener;
-import org.atcgroup.mcupdater.client.ui.screen.ProcessScreen;
+import me.gb2022.mcupdater.client.ui.desktop.screen.ProcessScreen;
 import org.atcgroup.mcupdater.util.FilePaths;
 
 import java.io.IOException;
@@ -22,6 +22,10 @@ public final class DownloadResult {
     private int waitingCounter = 0;
     private TaskListener listener = null;
     private long lastUpdateTime;
+
+
+
+
 
     private final UpdateHeader header;
 
@@ -84,6 +88,12 @@ public final class DownloadResult {
         for (var s : delete) {
             var a = delete.size();
             var p = (int) (counter / (float) a * 100);
+
+            var file = FilePath.RUNTIME.append(s).file();
+
+            if(!file.exists()){
+                return;
+            }
 
             listener.setUnsureProgress("正在移除旧版文件 [%s/%s - %s%%] : %s".formatted(counter, a, p, s));
 

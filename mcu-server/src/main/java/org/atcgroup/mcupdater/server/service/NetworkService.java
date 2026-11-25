@@ -4,6 +4,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import me.gb2022.mcupdater.protocol.MCUProtocol;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +36,7 @@ public final class NetworkService implements Service {
             i.handler(() -> new ServerHandler(MCUpdaterServer.instance()));
 
             MCUpdaterServer.instance().getServiceManager().fireNetworkBootstrap(MCUpdaterServer.instance(),i);
-            MCUProtocolV2.serverOptions(bootstrap);
+            MCUProtocol.serverOptions(bootstrap);
 
             bootstrap.group(this.bossGroup, this.workerGroup);
             bootstrap.channel(NioServerSocketChannel.class);

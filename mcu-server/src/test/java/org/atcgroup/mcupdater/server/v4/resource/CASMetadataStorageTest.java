@@ -2,9 +2,9 @@ package org.atcgroup.mcupdater.server.v4.resource;
 
 import com.google.gson.JsonObject;
 import me.gb2022.commons.file.FilePath;
-import org.atcgroup.mcupdater.server.v4.storage.CASMetadataStorage;
-import org.atcgroup.mcupdater.server.v4.storage.CASObjectMeta;
-import org.atcgroup.mcupdater.server.v4.storage.CASResourceStorage;
+import me.gb2022.mcupdater.storage.CASMetadataStorage;
+import me.gb2022.mcupdater.storage.CASObjectMeta;
+import me.gb2022.mcupdater.storage.CASResourceStorage;
 import org.atcgroup.mcupdater.util.FileDigest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

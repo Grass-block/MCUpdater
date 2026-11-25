@@ -38,7 +38,7 @@ test {
 
 jar{
     manifest{
-        attributes "Main-Class":"org.atcraftmc.mcupdater.cdn.MCUpdaterCDNServer";
+        attributes "Main-Class":"org.atcraftmc.mcupdater.cdn.CDNServer";
     }
     archiveBaseName="mc-updater-cdn"
     duplicatesStrategy = DuplicatesStrategy.INCLUDE

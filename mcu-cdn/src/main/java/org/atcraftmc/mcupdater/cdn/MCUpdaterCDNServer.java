@@ -4,6 +4,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import me.gb2022.commons.file.FilePath;
+import me.gb2022.mcupdater.protocol.MCUProtocol;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.FileRepository;
@@ -85,7 +86,7 @@ public final class MCUpdaterCDNServer implements Runnable {
 
         var bootstrap = new ServerBootstrap();
 
-        MCUProtocolV2.serverOptions(bootstrap);
+        MCUProtocol.serverOptions(bootstrap);
 
         bootstrap.group(this.bossGroup, this.workerGroup);
         bootstrap.channel(NioServerSocketChannel.class);

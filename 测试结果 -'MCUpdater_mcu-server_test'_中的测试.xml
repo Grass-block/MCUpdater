@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun duration="58720" footerText="由 IntelliJ IDEA 在 2026/11/20 20:50 生成" name="'MCUpdater.mcu-server.test' 中的测试">
+    <count name="total" value="61"/>
+    <count name="passed" value="61"/>
+    <config configId="GradleRunConfiguration" name="'MCUpdater.mcu-server.test' 中的测试">
+        <ExternalSystemSettings>
+            <option name="executionName"/>
+            <option name="externalProjectPath" value="E:/Java/Projects/MCUpdater"/>
+            <option name="externalSystemIdString" value="GRADLE"/>
+            <option name="scriptParameters" value=""/>
+            <option name="taskDescriptions">
+                <list/>
+            </option>
+            <option name="taskNames">
+                <list>
+                    <option value=":mcu-server:test"/>
+                </list>
+            </option>
+            <option name="vmOptions"/>
+        </ExternalSystemSettings>
+        <ExternalSystemDebugServerProcess/>
+        <ExternalSystemReattachDebugProcess/>
+        <DebugAllEnabled/>
+        <RunAsTest/>
+        <method v="2"/>
+    </config>
+    <suite duration="1444" locationUrl="java:suite://org.atcgroup.mcupdater.server.v4.VersionOperationTest" name="VersionOperationTest" status="passed">
+        <test duration="1328" locationUrl="java:test://org.atcgroup.mcupdater.server.v4.VersionOperationTest/rejectsManifestPathsOutsideRuntimeRoot" name="rejectsManifestPathsOutsideRuntimeRoot" status="passed"/>
+        <test duration="116" locationUrl="java:test://org.atcgroup.mcupdater.server.v4.VersionOperationTest/parsesManifestAndAppliesDeleteExtractAndUpdate" name="parsesManifestAndAppliesDeleteExtractAndUpdate" status="passed">
+            <output type="stdout">[2026-11-20 20:46:24] [I] ResourceStorage: Resource Registered: ca527369d9e8c1e081558bd92f90f65c4eb77e21(src:replacement)&#13;
+[2026-11-20 20:46:24] [I] ResourceStorage: Resource Registered: 8cce55bb3f33565ac25adbd5c58f28231c7ec836(src:pack.zip)&#13;
+</output>
+        </test>
+    </suite>
+    <suite duration="379" locationUrl="java:suite://org.atcgroup.mcupdater.server.v4.resource.CASMetadataStorageTest" name="CASMetadataStorageTest" status="passed">
+        <test duration="56" locationUrl="java:test://org.atcgroup.mcupdater.server.v4.resource.CASMetadataStorageTest/failedMigrationReleasesDatabaseAndCanBeRetried" name="failedMigrationReleasesDatabaseAndCanBeRetried" status="passed"/>
+        <test duration="126" locationUrl="java:test://org.atcgroup.mcupdater.server.v4.resource.CASMetadataStorageTest/registrationPersistsWithoutExplicitSaveAndDeduplicates" name="registrationPersistsWithoutExplicitSaveAndDeduplicates" status="passed">
+            <output type="stdout">[2026-11-20 20:46:24] [I] ResourceStorage: Resource Registered: 7037807198c22a7d2b0807371d763779a84fdfcf(src:source)&#13;
+</output>
+        </test>
+        <test duration="61" locationUrl="java:test://org.atcgroup.mcupdater.server.v4.resource.CASMetadataStorageTest/migratesLegacyJsonOnceAndPreservesIt" name="migratesLegacyJsonOnceAndPreservesIt" status="passed"/>
+        <test duration="65" locationUrl="java:test://org.atcgroup.mcupdater.server.v4.resource.CASMetadataStorageTest/retainsLongLengthsAndSourceLinksAfterReopen" name="retainsLongLengthsAndSourceLinksAfterReopen" status="passed"/>
+        <test duration="71" locationUrl="java:test://org.atcgroup.mcupdater.server.v4.resource.CASMetadataStorageTest/closeIsIdempotentAndRejectsFurtherAccess" name="closeIsIdempotentAndRejectsFurtherAccess" status="passed"/>
+    </suite>
+    <suite duration="54135" locationUrl="java:suite://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest" name="ResourceTransferBatchTest" status="passed">
+        <test duration="3080" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/masterDisconnectInterruptsUpgradedDownloadAndCleansStaging" name="masterDisconnectInterruptsUpgradedDownloadAndCleansStaging" status="passed">
+            <output type="stderr">SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".&#13;
+SLF4J: Defaulting to no-operation (NOP) logger implementation&#13;
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.&#13;
+</output>
+            <output type="stdout">[2026-11-20 20:46:25] [I] ResourceStorage: Resource Registered: 67dfd19f3eb3649d6f3f6631e44d0bd36b8d8d19(src:source)&#13;
+[2026-11-20 20:46:25] [W] MCU/RangeDownloader: [RangeDownloader] Chunk 0 failed (attempt 1/3): java.lang.InterruptedException&#13;
+</output>
+        </test>
+        <test duration="2067" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/initializationDefaultsToBftpAndIsReusable" name="initializationDefaultsToBftpAndIsReusable" status="passed"/>
+        <test duration="4526" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/httpDigestFailurePreservesExistingCacheAndDoesNotFallBackToWorker" name="httpDigestFailurePreservesExistingCacheAndDoesNotFallBackToWorker" status="passed">
+            <output type="stdout">[2026-11-20 20:46:30] [I] ResourceStorage: Resource Registered: 7037807198c22a7d2b0807371d763779a84fdfcf(src:source)&#13;
+[2026-11-20 20:46:30] [I] MCU/RangeDownloader: [RangeDownloader] Download complete: C:\Users\GB2022\AppData\Local\Temp\junit-17202189246579346473\downloads\.http-11492d61-1e17-44fd-8861-8c7034f32dd2-0&#13;
+</output>
+        </test>
+        <test duration="6465" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/attachedHttpServerIsUsedAndRemainsOwnedByCaller" name="attachedHttpServerIsUsedAndRemainsOwnedByCaller" status="passed">
+            <output type="stdout">[2026-11-20 20:46:34] [I] ResourceStorage: Resource Registered: e809c5d1cea47b45e34701d23f608a9a58034dc9(src:source)&#13;
+[2026-11-20 20:46:34] [I] MCU/RangeDownloader: [RangeDownloader] Download complete: C:\Users\GB2022\AppData\Local\Temp\junit-15694872429851620937\downloads\.http-d97e73b2-a41f-4d23-a960-b76eb05c213b-0&#13;
+</output>
+        </test>
+        <test duration="2115" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/cancellingUpgradedDownloadCleansStagingAndPreservesExternalMaster" name="cancellingUpgradedDownloadCleansStagingAndPreservesExternalMaster" status="passed">
+            <output type="stdout">[2026-11-20 20:46:41] [I] ResourceStorage: Resource Registered: 67dfd19f3eb3649d6f3f6631e44d0bd36b8d8d19(src:source)&#13;
+[2026-11-20 20:46:41] [W] MCU/RangeDownloader: [RangeDownloader] Chunk 0 failed (attempt 1/3): closed&#13;
+</output>
+        </test>
+        <test duration="2096" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/allMissingIsSuccessfulEmptyTransferWithAnExplicitMissingList" name="allMissingIsSuccessfulEmptyTransferWithAnExplicitMissingList" status="passed"/>
+        <test duration="2178" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/incompatibleMtuFailsInitializationBeforeRequestingFiles" name="incompatibleMtuFailsInitializationBeforeRequestingFiles" status="passed"/>
+        <test duration="2181" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/corruptCasObjectRejectsBatchBeforePayload" name="corruptCasObjectRejectsBatchBeforePayload" status="passed">
+            <output type="stdout">[2026-11-20 20:46:47] [I] ResourceStorage: Resource Registered: 7037807198c22a7d2b0807371d763779a84fdfcf(src:source)&#13;
+</output>
+        </test>
+        <test duration="2192" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/callbackFailureBeforeReadyAbortsWithoutPayloadOrFinalFiles" name="callbackFailureBeforeReadyAbortsWithoutPayloadOrFinalFiles" status="passed">
+            <output type="stdout">[2026-11-20 20:46:49] [I] ResourceStorage: Resource Registered: ed4a77d1b56a118938788fc53037759b6c501e3d(src:source)&#13;
+</output>
+        </test>
+        <test duration="2245" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/missingIdsAreReportedBeforeDataAndEveryOfferedFileIsCommitted" name="missingIdsAreReportedBeforeDataAndEveryOfferedFileIsCommitted" status="passed">
+            <output type="stdout">[2026-11-20 20:46:51] [I] ResourceStorage: Resource Registered: 7037807198c22a7d2b0807371d763779a84fdfcf(src:small-source)&#13;
+[2026-11-20 20:46:51] [I] ResourceStorage: Resource Registered: dfc3081cb2adda9740695163c2fc1a813f5d4305(src:large-source)&#13;
+</output>
+        </test>
+        <test duration="2207" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/sequentialBatchesReuseConnectionAndEmptyBatchIsValid" name="sequentialBatchesReuseConnectionAndEmptyBatchIsValid" status="passed">
+            <output type="stdout">[2026-11-20 20:46:54] [I] ResourceStorage: Resource Registered: da39a3ee5e6b4b0d3255bfef95601890afd80709(src:source)&#13;
+</output>
+        </test>
+        <test duration="2087" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/httpSelectionDoesNotRequireBftpMtuCompatibility" name="httpSelectionDoesNotRequireBftpMtuCompatibility" status="passed"/>
+        <test duration="6277" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/ownedHttpListenerStopsWithRtpServer" name="ownedHttpListenerStopsWithRtpServer" status="passed"/>
+        <test duration="86" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/casRegistrationDeduplicatesAndReloadsLowercaseSha1Index" name="casRegistrationDeduplicatesAndReloadsLowercaseSha1Index" status="passed">
+            <output type="stdout">[2026-11-20 20:47:04] [I] ResourceStorage: Resource Registered: 7037807198c22a7d2b0807371d763779a84fdfcf(src:source)&#13;
+</output>
+        </test>
+        <test duration="9339" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/stoppedHttpEndpointFailsBatchWithoutCreatingBftpWorker" name="stoppedHttpEndpointFailsBatchWithoutCreatingBftpWorker" status="passed">
+            <output type="stdout">[2026-11-20 20:47:04] [I] ResourceStorage: Resource Registered: 7037807198c22a7d2b0807371d763779a84fdfcf(src:source)&#13;
+[2026-11-20 20:47:08] [W] MCU/RangeDownloader: [RangeDownloader] Probe failed (attempt 1/3): null&#13;
+[2026-11-20 20:47:09] [W] MCU/RangeDownloader: [RangeDownloader] Probe failed (attempt 2/3): null&#13;
+[2026-11-20 20:47:10] [W] MCU/RangeDownloader: [RangeDownloader] Probe failed (attempt 3/3): null&#13;
+[2026-11-20 20:47:11] [W] MCU/RangeDownloader: [RangeDownloader] Probe failed (attempt 4/3): null&#13;
+</output>
+        </test>
+        <test duration="4994" locationUrl="java:test://lab.starfish.mcupdater.rtp.ResourceTransferBatchTest/negotiatedHttpTransfersLargeSmallEmptyAndMissingWithoutWorkerConnection" name="negotiatedHttpTransfersLargeSmallEmptyAndMissingWithoutWorkerConnection" status="passed">
+            <output type="stdout">[2026-11-20 20:47:14] [I] ResourceStorage: Resource Registered: 7037807198c22a7d2b0807371d763779a84fdfcf(src:small)&#13;
+[2026-11-20 20:47:14] [I] ResourceStorage: Resource Registered: 2425c202b08395ce3c4f570f1c479e42aa8311c4(src:source)&#13;
+[2026-11-20 20:47:14] [I] ResourceStorage: Resource Registered: da39a3ee5e6b4b0d3255bfef95601890afd80709(src:empty)&#13;
+[2026-11-20 20:47:14] [I] MCU/RangeDownloader: [RangeDownloader] Download complete: C:\Users\GB2022\AppData\Local\Temp\junit-14836910064828076953\downloads\.http-a98f3fd7-acd7-4c95-bd77-12bd9964d3b7-0&#13;
+[2026-11-20 20:47:14] [I] MCU/RangeDownloader: [RangeDownloader] Download complete: C:\Users\GB2022\AppData\Local\Temp\junit-14836910064828076953\downloads\.http-a98f3fd7-acd7-4c95-bd77-12bd9964d3b7-1&#13;
+[2026-11-20 20:47:14] [W] MCU/RangeDownloader: [RangeDownloader] Server does not support Range, falling back to single-thread download.&#13;
+[2026-11-20 20:47:14] [I] MCU/RangeDownloader: [RangeDownloader] Download complete: C:\Users\GB2022\AppData\Local\Temp\junit-14836910064828076953\downloads\.http-a98f3fd7-acd7-4c95-bd77-12bd9964d3b7-2&#13;
+[2026-11-20 20:47:14] [I] MCU/RangeDownloader: [RangeDownloader] Download complete: C:\Users\GB2022\AppData\Local\Temp\junit-14836910064828076953\downloads\.http-19375fdd-5266-494b-bbf7-58c7287430b8-0&#13;
+</output>
+        </test>
+    </suite>
+    <suite duration="242" locationUrl="java:suite://lab.starfish.mcupdater.rtp.TransferFileReceiverTest" name="TransferFileReceiverTest" status="passed">
+        <suite duration="122" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/fixedMtuPartsCanArriveInReverseOrder" name="fixedMtuPartsCanArriveInReverseOrder(int)" status="passed">
+            <test duration="36" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/fixedMtuPartsCanArriveInReverseOrder[1]" name="[1] 1" status="passed"/>
+            <test duration="10" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/fixedMtuPartsCanArriveInReverseOrder[2]" name="[2] 65536" status="passed"/>
+            <test duration="11" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/fixedMtuPartsCanArriveInReverseOrder[3]" name="[3] 65537" status="passed"/>
+            <test duration="10" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/fixedMtuPartsCanArriveInReverseOrder[4]" name="[4] 131072" status="passed"/>
+            <test duration="12" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/fixedMtuPartsCanArriveInReverseOrder[5]" name="[5] 131089" status="passed"/>
+        </suite>
+        <test duration="8" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/timeoutAfterPartialWriteCleansResourcesWithoutCommitting" name="timeoutAfterPartialWriteCleansResourcesWithoutCommitting" status="passed"/>
+        <test duration="10" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/rejectedWriteCanBeRetriedWithoutLosingThePart" name="rejectedWriteCanBeRetriedWithoutLosingThePart" status="passed"/>
+        <test duration="11" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/hashFailurePreservesExistingDestinationAndDeletesStaging" name="hashFailurePreservesExistingDestinationAndDeletesStaging" status="passed"/>
+        <test duration="6" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/cancellingBeforeQueuedWritePreventsFileCreation" name="cancellingBeforeQueuedWritePreventsFileCreation" status="passed"/>
+        <suite duration="36" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/inlineCommitsWithoutBitSetOrScheduling" name="inlineCommitsWithoutBitSetOrScheduling(int)" status="passed">
+            <test duration="10" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/inlineCommitsWithoutBitSetOrScheduling[1]" name="[1] 0" status="passed"/>
+            <test duration="10" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/inlineCommitsWithoutBitSetOrScheduling[2]" name="[2] 1" status="passed"/>
+            <test duration="11" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/inlineCommitsWithoutBitSetOrScheduling[3]" name="[3] 16384" status="passed"/>
+        </suite>
+        <test duration="6" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/invalidPartIdsAndLengthsCannotChangeProgress" name="invalidPartIdsAndLengthsCannotChangeProgress" status="passed"/>
+        <test duration="8" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/bitSetChangesOnlyAfterDiskOperationCompletes" name="bitSetChangesOnlyAfterDiskOperationCompletes" status="passed"/>
+        <test duration="27" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/schedulerSkipsReceivedPendingAndRequestedIds" name="schedulerSkipsReceivedPendingAndRequestedIds" status="passed"/>
+        <test duration="8" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferFileReceiverTest/duplicatePendingPartQueuesOnlyOneWrite" name="duplicatePendingPartQueuesOnlyOneWrite" status="passed"/>
+    </suite>
+    <suite duration="2290" locationUrl="java:suite://lab.starfish.mcupdater.rtp.TransferManagerTest" name="TransferManagerTest" status="passed">
+        <test duration="20" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferManagerTest/closeIsIdempotentCancelsTasksAndRejectsFurtherWork" name="closeIsIdempotentCancelsTasksAndRejectsFurtherWork" status="passed"/>
+        <test duration="16" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferManagerTest/rejectsInvalidMetadataAndTaskCapacity" name="rejectsInvalidMetadataAndTaskCapacity" status="passed"/>
+        <test duration="21" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferManagerTest/taskIdsRouteInterleavedPayloadsToDifferentFiles" name="taskIdsRouteInterleavedPayloadsToDifferentFiles" status="passed"/>
+        <test duration="57" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferManagerTest/concurrentShuffledPartsProduceExactFileContent" name="concurrentShuffledPartsProduceExactFileContent" status="passed"/>
+        <test duration="11" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferManagerTest/registrationRejectsDuplicateTaskAndNormalizedDestination" name="registrationRejectsDuplicateTaskAndNormalizedDestination" status="passed"/>
+        <test duration="2160" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferManagerTest/existingWireSmokeSuiteRunsUnderJUnit" name="existingWireSmokeSuiteRunsUnderJUnit" status="passed">
+            <output type="stdout">TransferReceiveTest: all checks passed&#13;
+</output>
+        </test>
+        <test duration="5" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferManagerTest/unknownTaskDoesNotCreateFilesOrAffectExistingTask" name="unknownTaskDoesNotCreateFilesOrAffectExistingTask" status="passed"/>
+    </suite>
+    <suite duration="58" locationUrl="java:suite://lab.starfish.mcupdater.rtp.TransferProtocolTest" name="TransferProtocolTest" status="passed">
+        <test duration="7" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/registryRoundTripsAllPacketTypes" name="registryRoundTripsAllPacketTypes" status="passed"/>
+        <test duration="1" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/partWireFormatUsesAnIntIdInsteadOfAnArbitraryOffset" name="partWireFormatUsesAnIntIdInsteadOfAnArbitraryOffset" status="passed"/>
+        <test duration="2" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsTrailingBytesAndUnknownPacketId" name="rejectsTrailingBytesAndUnknownPacketId" status="passed"/>
+        <test duration="5" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsTruncatedPayloadNegativePartAndUnknownStatus" name="rejectsTruncatedPayloadNegativePartAndUnknownStatus" status="passed"/>
+        <suite duration="25" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedTaskIdLengthsBeforeAllocation" name="rejectsMalformedTaskIdLengthsBeforeAllocation(int)" status="passed">
+            <test duration="4" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedTaskIdLengthsBeforeAllocation[1]" name="[1] -1" status="passed"/>
+            <test duration="3" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedTaskIdLengthsBeforeAllocation[2]" name="[2] 0" status="passed"/>
+            <test duration="3" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedTaskIdLengthsBeforeAllocation[3]" name="[3] 513" status="passed"/>
+            <test duration="2" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedTaskIdLengthsBeforeAllocation[4]" name="[4] 2147483647" status="passed"/>
+        </suite>
+        <test duration="3" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/constructorsRejectOversizedPayloadAndInvalidIds" name="constructorsRejectOversizedPayloadAndInvalidIds" status="passed"/>
+        <test duration="3" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/frameCodecHandlesFragmentedAndCoalescedTcpData" name="frameCodecHandlesFragmentedAndCoalescedTcpData" status="passed"/>
+        <suite duration="10" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedPayloadLengths" name="rejectsMalformedPayloadLengths(int)" status="passed">
+            <test duration="2" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedPayloadLengths[1]" name="[1] -1" status="passed"/>
+            <test duration="2" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedPayloadLengths[2]" name="[2] 65537" status="passed"/>
+            <test duration="1" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/rejectsMalformedPayloadLengths[3]" name="[3] 2147483647" status="passed"/>
+        </suite>
+        <test duration="2" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferProtocolTest/requiresLowercaseSha1AndMatchingCasIndex" name="requiresLowercaseSha1AndMatchingCasIndex" status="passed"/>
+    </suite>
+    <suite duration="45" locationUrl="java:suite://lab.starfish.mcupdater.rtp.TransferSocketTest" name="TransferSocketTest" status="passed">
+        <test duration="45" locationUrl="java:test://lab.starfish.mcupdater.rtp.TransferSocketTest/realInitializerPullsPartsAndReportsCompletionOverLoopbackTcp" name="realInitializerPullsPartsAndReportsCompletionOverLoopbackTcp" status="passed"/>
+    </suite>
+</testrun>

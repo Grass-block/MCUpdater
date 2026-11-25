@@ -34,7 +34,34 @@ dependencies {
     compileOnly 'io.netty:netty-transport:4.1.119.Final'
     compileOnly 'io.netty:netty-codec-http:4.1.119.Final'
 
+    implementation 'org.iq80.leveldb:leveldb:0.12'
+
     implementation gbuildLib('me.gb2022.simpnet:simpnet-base')
 
-    compileOnly 'org.rocksdb:rocksdbjni:11.8.1'
+
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Netty, logging and CAS native libraries are supplied by consumers in production.
+// The transferred tests need them on their own compile and runtime classpaths.
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Opt-in only: generates and transfers 16 GiB; never runs as part of test/check/build.
+tasks.register('rtpBenchmark', JavaExec) {
+    group = 'benchmark'
+    description = 'Transfer 16 GiB of random files over loopback RTP (explicit invocation only).'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'me.gb2022.mcupdater.BenchmarkClient'
+    maxHeapSize = '1g'
+    workingDir = projectDir
+    args providers.gradleProperty('rtpBenchmarkMode').getOrElse('bftp')
 }

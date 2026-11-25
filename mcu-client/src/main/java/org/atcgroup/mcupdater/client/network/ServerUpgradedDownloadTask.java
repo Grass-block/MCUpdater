@@ -5,9 +5,9 @@ import org.atcgroup.mcupdater.network.RangeDownloader;
 import me.gb2022.commons.math.SHA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.atcgroup.mcupdater.client.ClientFilePath;
+import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
-import org.atcgroup.mcupdater.client.ui.UI;
+import me.gb2022.mcupdater.client.ui.desktop.UI;
 import org.atcgroup.mcupdater.network.packet.P33_FTPUpgradeToHttp;
 import org.atcgroup.mcupdater.util.FileDigest;
 
@@ -52,8 +52,8 @@ public final class ServerUpgradedDownloadTask implements Runnable {
                 var t = UI.NUMBER_FORMAT.format(total / 1024f / 1024f);
                 var p = (int) ((double) downloaded / (double) total * 100);
 
-                MCUpdaterClient.INSTANCE.getProcessScreen().setProgress(p);
-                MCUpdaterClient.INSTANCE.getProcessScreen().setProgressTitle("正在下载资源文件: %s - %s%% (%s/%s MiB)".formatted(resId, p, r, t));
+                MCUpdaterClient.instance().getProcessScreen().setProgress(p);
+                MCUpdaterClient.instance().getProcessScreen().setProgressTitle("正在下载资源文件: %s - %s%% (%s/%s MiB)".formatted(resId, p, r, t));
             });
 
             var sha1 = SHA.byteArrayToHexString(FileDigest.calculateSHA1(file));
