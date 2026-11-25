@@ -10,15 +10,10 @@ import me.gb2022.mcupdater.rtp.protocol.P62_RTPBatchRequest;
 import org.atcgroup.mcupdater.network.RangeDownloader;
 import org.atcgroup.mcupdater.util.FileDigest;
 
-import java.net.InetSocketAddress;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /** Resolves remote assets into verified local resources before applying an update. */

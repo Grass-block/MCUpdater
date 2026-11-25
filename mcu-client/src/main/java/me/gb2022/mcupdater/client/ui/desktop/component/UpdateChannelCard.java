@@ -1,7 +1,7 @@
 package me.gb2022.mcupdater.client.ui.desktop.component;
 
-import me.gb2022.mcupdater.data.ChannelMetadata;
 import me.gb2022.mcupdater.client.ClientVersionRecord;
+import me.gb2022.mcupdater.data.ChannelMetadata;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;

@@ -1,13 +1,12 @@
 package org.atcgroup.mcupdater.client.network;
 
-import org.atcgroup.mcupdater.network.RangeDownloader;
-
 import me.gb2022.commons.math.SHA;
+import me.gb2022.mcupdater.client.ui.desktop.UI;
+import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
-import me.gb2022.mcupdater.client.ui.desktop.UI;
+import org.atcgroup.mcupdater.network.RangeDownloader;
 import org.atcgroup.mcupdater.network.packet.P33_FTPUpgradeToHttp;
 import org.atcgroup.mcupdater.util.FileDigest;
 

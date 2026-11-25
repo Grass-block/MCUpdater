@@ -15,7 +15,6 @@ import me.gb2022.mcupdater.rtp.protocol.P63_RTPBatchResponse;
 import me.gb2022.mcupdater.rtp.protocol.P72_FTPPayload;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import org.atcgroup.mcupdater.network.MCUProtocolV2;
 
 import java.io.Closeable;
 import java.net.InetSocketAddress;

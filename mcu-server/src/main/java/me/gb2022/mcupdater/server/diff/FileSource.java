@@ -1,7 +1,7 @@
 package me.gb2022.mcupdater.server.diff;
 
 import me.gb2022.mcupdater.data.ChannelMetadata;
-import org.atcgroup.mcupdater.data.UpdateChannelMeta;
+import me.gb2022.mcupdater.data.TranslatableComponent;
 import org.atcgroup.mcupdater.server.file.FileStatusManager;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -18,11 +18,11 @@ public final class FileSource {
     public FileSource(String id, ConfigurationSection config) {
         this.path = config.getString("path");
 
-        var name = config.getString("name");
-        var desc = config.getString("desc");
+        var name = new TranslatableComponent(config.getConfigurationSection("name").getValues(false));
+        var desc = new TranslatableComponent(config.getConfigurationSection("desc").getValues(false));
         var required = config.getBoolean("required", false);
 
-        this.meta = new UpdateChannelMeta(id, name, desc, required);
+        this.meta = new ChannelMetadata(id, required, name, desc);
         this.statusManager = new FileStatusManager(id, config);
     }
 
@@ -30,7 +30,7 @@ public final class FileSource {
         return path;
     }
 
-    public UpdateChannelMeta meta() {
+    public ChannelMetadata meta() {
         return meta;
     }
 

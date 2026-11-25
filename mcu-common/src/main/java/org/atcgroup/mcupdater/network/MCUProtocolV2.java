@@ -1,6 +1,8 @@
 package org.atcgroup.mcupdater.network;
 
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.simpnet.channel.NettyChannelInitializer;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketRegistry;

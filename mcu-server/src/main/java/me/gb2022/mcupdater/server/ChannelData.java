@@ -4,8 +4,8 @@ import me.gb2022.mcupdater.data.ChannelMetadata;
 import me.gb2022.mcupdater.data.TranslatableComponent;
 import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class ChannelData {

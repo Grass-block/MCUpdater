@@ -1,12 +1,11 @@
-package org.atcgroup.mcupdater.server.v4.rtp;
+package me.gb2022.mcupdater.rtp;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
+import me.gb2022.mcupdater.rtp.protocol.*;
 import me.gb2022.simpnet.channel.FrameDecoder;
 import me.gb2022.simpnet.channel.FrameEncoder;
 import me.gb2022.simpnet.packet.PacketCodec;
-import org.atcgroup.mcupdater.server.v4.rtp.*;
-import org.atcgroup.mcupdater.server.v4.rtp.protocol.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

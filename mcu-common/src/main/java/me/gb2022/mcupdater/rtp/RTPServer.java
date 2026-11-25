@@ -3,9 +3,9 @@ package me.gb2022.mcupdater.rtp;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import me.gb2022.mcupdater.rtp.protocol.*;
+import me.gb2022.mcupdater.storage.CASResourceStorage;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import me.gb2022.mcupdater.storage.CASResourceStorage;
 import org.atcgroup.mcupdater.util.FileDigest;
 
 import java.io.IOException;

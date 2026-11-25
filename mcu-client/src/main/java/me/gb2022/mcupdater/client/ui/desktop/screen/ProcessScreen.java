@@ -1,11 +1,11 @@
 package me.gb2022.mcupdater.client.ui.desktop.screen;
 
 
-import org.atcgroup.mcupdater.client.ui.TaskListener;
 import me.gb2022.mcupdater.client.ui.desktop.UI;
 import me.gb2022.mcupdater.client.ui.desktop.component.ExtraTaskCard;
 import me.gb2022.mcupdater.client.ui.desktop.component.ImagePanel;
 import me.gb2022.mcupdater.client.ui.desktop.component.SimpleJList;
+import org.atcgroup.mcupdater.client.ui.TaskListener;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;

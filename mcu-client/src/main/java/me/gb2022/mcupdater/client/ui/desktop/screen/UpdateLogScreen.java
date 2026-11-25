@@ -1,11 +1,11 @@
 package me.gb2022.mcupdater.client.ui.desktop.screen;
 
-import org.atcgroup.mcupdater.CompiledVersionData;
-import org.atcgroup.mcupdater.client.MCUpdaterClient;
 import me.gb2022.mcupdater.client.ui.desktop.UI;
 import me.gb2022.mcupdater.client.ui.desktop.component.ImagePanel;
 import me.gb2022.mcupdater.client.ui.desktop.component.SimpleJList;
 import me.gb2022.mcupdater.client.ui.desktop.component.UpdateInfoCard;
+import org.atcgroup.mcupdater.CompiledVersionData;
+import org.atcgroup.mcupdater.client.MCUpdaterClient;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;

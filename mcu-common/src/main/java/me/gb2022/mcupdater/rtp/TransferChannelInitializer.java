@@ -2,8 +2,8 @@ package me.gb2022.mcupdater.rtp;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import me.gb2022.simpnet.channel.NettyChannelInitializer;
 import me.gb2022.mcupdater.rtp.protocol.RTPProtocol;
+import me.gb2022.simpnet.channel.NettyChannelInitializer;
 
 import java.util.Objects;
 

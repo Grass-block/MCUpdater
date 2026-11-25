@@ -1,6 +1,5 @@
 package me.gb2022.mcupdater.client.ui.desktop.screen;
 
-import org.atcgroup.mcupdater.client.MCUpdaterClient;
 import me.gb2022.mcupdater.client.ui.desktop.UI;
 import me.gb2022.mcupdater.client.ui.desktop.component.ImagePanel;
 

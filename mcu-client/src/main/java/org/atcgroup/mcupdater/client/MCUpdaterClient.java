@@ -1,10 +1,12 @@
 package org.atcgroup.mcupdater.client;
 
+import me.gb2022.mcupdater.client.ClientConfig;
 import me.gb2022.mcupdater.client.ClientError;
 import me.gb2022.mcupdater.client.ClientVersionRecord;
-import me.gb2022.mcupdater.client.ClientConfig;
 import me.gb2022.mcupdater.client.ui.desktop.NotificationService;
-import me.gb2022.mcupdater.client.ui.desktop.screen.*;
+import me.gb2022.mcupdater.client.ui.desktop.screen.ProcessScreen;
+import me.gb2022.mcupdater.client.ui.desktop.screen.UpdateLogScreen;
+import me.gb2022.mcupdater.client.ui.desktop.screen.WelcomeScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.UpdateHeader;

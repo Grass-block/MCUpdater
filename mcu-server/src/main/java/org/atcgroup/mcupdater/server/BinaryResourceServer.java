@@ -1,6 +1,7 @@
 package org.atcgroup.mcupdater.server;
 
 import io.netty.channel.ChannelHandlerContext;
+import me.gb2022.mcupdater.storage.CASResourceStorage;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
 import org.apache.logging.log4j.LogManager;
@@ -8,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.network.MCUProtocolV2;
 import org.atcgroup.mcupdater.network.handler.FileDownloadHandler;
 import org.atcgroup.mcupdater.network.packet.*;
-import me.gb2022.mcupdater.storage.CASResourceStorage;
 
 import java.io.File;
 import java.util.ArrayList;

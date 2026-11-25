@@ -1,11 +1,11 @@
 package org.atcgroup.mcupdater.client.download;
 
 import me.gb2022.commons.file.FilePath;
+import me.gb2022.mcupdater.client.ui.desktop.screen.ProcessScreen;
+import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.atcgroup.mcupdater.PatchFile;
 import org.atcgroup.mcupdater.UpdateHeader;
-import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.atcgroup.mcupdater.client.ui.TaskListener;
-import me.gb2022.mcupdater.client.ui.desktop.screen.ProcessScreen;
 import org.atcgroup.mcupdater.util.FilePaths;
 
 import java.io.IOException;

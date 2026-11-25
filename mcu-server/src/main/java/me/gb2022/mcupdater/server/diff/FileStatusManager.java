@@ -2,8 +2,8 @@ package me.gb2022.mcupdater.server.diff;
 
 import me.gb2022.commons.file.FilePath;
 import me.gb2022.commons.math.SHA;
-import org.atcgroup.mcupdater.server.file.FileModifyStatus;
 import me.gb2022.mcupdater.data.DiffFileInfo;
+import org.atcgroup.mcupdater.server.file.FileModifyStatus;
 
 import java.io.File;
 import java.util.HashMap;

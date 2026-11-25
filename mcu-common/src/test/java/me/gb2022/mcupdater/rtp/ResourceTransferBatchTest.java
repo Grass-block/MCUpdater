@@ -1,21 +1,18 @@
-package org.atcgroup.mcupdater.server.v4.rtp;
+package me.gb2022.mcupdater.rtp;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.SocketChannel;
-import me.gb2022.simpnet.channel.NettyChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import me.gb2022.commons.file.FilePath;
-import org.atcgroup.mcupdater.server.v4.rtp.FTPClient;
-import org.atcgroup.mcupdater.server.v4.rtp.FTPServer;
-import org.atcgroup.mcupdater.server.v4.rtp.TransferProgress;
-import org.atcgroup.mcupdater.server.v4.rtp.protocol.RTPProtocol;
-import org.atcgroup.mcupdater.server.v4.rtp.protocol.P61_RTPProtocolInfo;
-import org.atcgroup.mcupdater.server.v4.HttpResourceServer;
+import me.gb2022.mcupdater.rtp.protocol.P61_RTPProtocolInfo;
+import me.gb2022.mcupdater.rtp.protocol.RTPProtocol;
+import me.gb2022.mcupdater.storage.CASResourceStorage;
+import me.gb2022.simpnet.channel.NettyChannelInitializer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -23,12 +20,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import org.atcgroup.mcupdater.server.v4.storage.CASResourceStorage;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static org.atcgroup.mcupdater.server.v4.rtp.TransferTestSupport.*;
+import static me.gb2022.mcupdater.rtp.TransferTestSupport.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceTransferBatchTest {
@@ -360,9 +356,9 @@ class ResourceTransferBatchTest {
         final NioEventLoopGroup sender = new NioEventLoopGroup(1);
         final Path downloads = directory.resolve("downloads");
         final CASResourceStorage storage = new CASResourceStorage(new FilePath(directory.resolve("cas").toString()));
-        final FTPServer server;
+        final RTPServer server;
         HttpResourceServer borrowedHttp;
-        final FTPClient client = new FTPClient(new FilePath(this.downloads.toString()));
+        final RTPClient client = new RTPClient(new FilePath(this.downloads.toString()));
         Channel listener;
         Channel connection;
         boolean initialized;
@@ -386,9 +382,9 @@ class ResourceTransferBatchTest {
             if (httpMode == 2) {
                 this.borrowedHttp = new HttpResourceServer(storage);
                 this.borrowedHttp.start(0);
-                this.server = new FTPServer(storage, this.borrowedHttp, "http://127.0.0.1:" + this.borrowedHttp.getLocalAddress().getPort());
+                this.server = new RTPServer(storage, this.borrowedHttp, "http://127.0.0.1:" + this.borrowedHttp.getLocalAddress().getPort());
             } else {
-                this.server = capabilities == null ? new FTPServer(storage) : new FTPServer(storage, capabilities);
+                this.server = capabilities == null ? new RTPServer(storage) : new RTPServer(storage, capabilities);
             }
             try {
                 if (httpMode == 1) this.server.startHttp(0, "127.0.0.1");
