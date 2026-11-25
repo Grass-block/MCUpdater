@@ -1,14 +1,14 @@
 package me.gb2022.mcupdater.rtp.protocol;
 
 import io.netty.buffer.ByteBuf;
-import me.gb2022.simpnet.packet.Packet;
-import me.gb2022.simpnet.packet.DeserializedConstructor;
-import me.gb2022.simpnet.util.BufferUtil;
 import me.gb2022.mcupdater.rtp.TransferFileReceiver;
+import me.gb2022.simpnet.packet.DeserializedConstructor;
+import me.gb2022.simpnet.packet.Packet;
+import me.gb2022.simpnet.util.BufferUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 
 /** Complete partition of the requested IDs, sent before any file payload. */
 public final class P63_RTPBatchResponse implements Packet {

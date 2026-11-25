@@ -1,8 +1,5 @@
-package org.atcgroup.mcupdater.server.v4.rtp;
+package me.gb2022.mcupdater.rtp;
 
-import org.atcgroup.mcupdater.server.v4.rtp.TransferFileReceiver;
-import org.atcgroup.mcupdater.server.v4.rtp.TransferMode;
-import org.atcgroup.mcupdater.server.v4.rtp.TransferTask;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +12,7 @@ import java.util.BitSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.RejectedExecutionException;
 
-import static org.atcgroup.mcupdater.server.v4.rtp.TransferTestSupport.*;
+import static me.gb2022.mcupdater.rtp.TransferTestSupport.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TransferFileReceiverTest {

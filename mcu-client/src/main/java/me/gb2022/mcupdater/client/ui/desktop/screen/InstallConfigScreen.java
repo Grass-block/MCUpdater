@@ -1,11 +1,11 @@
 package me.gb2022.mcupdater.client.ui.desktop.screen;
 
 import me.gb2022.mcupdater.client.ClientVersionRecord;
-import me.gb2022.mcupdater.data.ChannelMetadata;
 import me.gb2022.mcupdater.client.ui.desktop.UI;
 import me.gb2022.mcupdater.client.ui.desktop.component.ImagePanel;
 import me.gb2022.mcupdater.client.ui.desktop.component.SimpleJList;
 import me.gb2022.mcupdater.client.ui.desktop.component.UpdateChannelCard;
+import me.gb2022.mcupdater.data.ChannelMetadata;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;

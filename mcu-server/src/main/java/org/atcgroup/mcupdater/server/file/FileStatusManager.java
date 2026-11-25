@@ -4,8 +4,8 @@ import me.gb2022.commons.math.SHA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.atcgroup.mcupdater.util.FileDigest;
-import org.atcgroup.mcupdater.util.I18n;
 import org.atcgroup.mcupdater.util.FilePaths;
+import org.atcgroup.mcupdater.util.I18n;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;

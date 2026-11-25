@@ -9,7 +9,6 @@ import me.gb2022.mcupdater.client.MCUpdaterClient;
 import me.gb2022.mcupdater.protocol.MCUProtocol;
 import me.gb2022.simpnet.packet.Packet;
 import org.atcgroup.mcupdater.network.ErrorCatchHandler;
-import org.atcgroup.mcupdater.network.MCUProtocolV2;
 
 import java.net.InetSocketAddress;
 

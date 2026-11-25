@@ -6,7 +6,6 @@ import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.util.BufferUtil;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public final class P41_CDNFileCheckResult implements Packet {

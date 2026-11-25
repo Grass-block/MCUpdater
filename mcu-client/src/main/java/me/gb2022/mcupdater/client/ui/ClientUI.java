@@ -1,8 +1,8 @@
 package me.gb2022.mcupdater.client.ui;
 
 import me.gb2022.mcupdater.UpdateHeader;
-import me.gb2022.mcupdater.client.ClientError;
 import me.gb2022.mcupdater.client.ClientConfig;
+import me.gb2022.mcupdater.client.ClientError;
 import me.gb2022.mcupdater.client.MCUpdaterClient;
 import me.gb2022.mcupdater.data.ChannelMetadata;
 

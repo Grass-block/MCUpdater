@@ -8,29 +8,29 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class TranslatableComponent {
-    private final Map<String, String> translations;
+    private final Map<String, Object> translations;
 
-    public TranslatableComponent(Map<String, String> translations) {
+    public TranslatableComponent(Map<String, Object> translations) {
         this.translations = translations;
     }
 
     public String get(String language) {
         if (this.translations.containsKey(language)) {
-            return this.translations.get(language);
+            return this.translations.get(language).toString();
         }
 
-        return this.translations.get(this.translations.keySet().iterator().next());
+        return this.translations.get(this.translations.keySet().iterator().next()).toString();
     }
 
-    public String get(){
+    public String get() {
         return get(Locale.getDefault().toString().toLowerCase());
     }
 
     public void encode(ByteBuf buffer) {
         buffer.writeByte(this.translations.size());
-        for (Map.Entry<String, String> entry : this.translations.entrySet()) {
+        for (var entry : this.translations.entrySet()) {
             BufferUtil.writeString(buffer, entry.getKey());
-            BufferUtil.writeString(buffer, entry.getValue());
+            BufferUtil.writeString(buffer, entry.getValue().toString());
         }
     }
 

@@ -1,10 +1,10 @@
 package me.gb2022.mcupdater.client;
 
 import me.gb2022.mcupdater.client.ui.DesktopClientUI;
+import me.gb2022.mcupdater.client.ui.desktop.NotificationService;
+import me.gb2022.mcupdater.client.util.ApplicationEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import me.gb2022.mcupdater.client.util.ApplicationEntry;
-import me.gb2022.mcupdater.client.ui.desktop.NotificationService;
 import org.atcgroup.mcupdater.util.FilePaths;
 
 import java.io.File;

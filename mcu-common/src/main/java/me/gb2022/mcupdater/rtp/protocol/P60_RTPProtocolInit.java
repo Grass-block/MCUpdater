@@ -1,8 +1,8 @@
 package me.gb2022.mcupdater.rtp.protocol;
 
-import me.gb2022.simpnet.packet.Packet;
 import io.netty.buffer.ByteBuf;
 import me.gb2022.simpnet.packet.DeserializedConstructor;
+import me.gb2022.simpnet.packet.Packet;
 
 public final class P60_RTPProtocolInit implements Packet {
     public P60_RTPProtocolInit() {

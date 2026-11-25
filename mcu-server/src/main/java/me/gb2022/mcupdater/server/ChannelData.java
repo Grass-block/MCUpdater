@@ -4,8 +4,8 @@ import me.gb2022.mcupdater.data.ChannelMetadata;
 import me.gb2022.mcupdater.data.TranslatableComponent;
 import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class ChannelData {
@@ -34,7 +34,7 @@ public final class ChannelData {
             // Keep scalar text usable and allow an omitted description.
             return new TranslatableComponent(Map.of("zh_cn", section == null ? config.getString(key, "") : ""));
         }
-        var translations = new LinkedHashMap<String, String>();
+        var translations = new LinkedHashMap<String, Object>();
         for (var language : section.getKeys(false)) {
             translations.put(language, section.getString(language, ""));
         }

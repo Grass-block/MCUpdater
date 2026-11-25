@@ -2,8 +2,8 @@ package me.gb2022.mcupdater.client.ui;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import me.gb2022.mcupdater.UpdateHeader;
-import me.gb2022.mcupdater.client.ClientError;
 import me.gb2022.mcupdater.client.ClientConfig;
+import me.gb2022.mcupdater.client.ClientError;
 import me.gb2022.mcupdater.client.ui.desktop.MainWindow;
 import me.gb2022.mcupdater.client.ui.desktop.NotificationService;
 import me.gb2022.mcupdater.client.ui.desktop.screen.*;

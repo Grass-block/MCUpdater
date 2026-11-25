@@ -1,7 +1,6 @@
 package me.gb2022.mcupdater.server;
 
 import me.gb2022.commons.file.FilePath;
-import me.gb2022.mcupdater.rtp.RTPServer;
 import me.gb2022.mcupdater.storage.CASResourceStorage;
 
 public class MCUpdaterServer {

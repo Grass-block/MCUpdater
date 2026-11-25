@@ -1,6 +1,4 @@
-package org.atcgroup.mcupdater.server.v4.rtp;
-
-import org.atcgroup.mcupdater.server.v4.rtp.TransferFileReceiver;
+package me.gb2022.mcupdater.rtp;
 
 import java.security.MessageDigest;
 import java.time.Duration;

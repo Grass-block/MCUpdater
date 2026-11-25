@@ -1,10 +1,10 @@
 package me.gb2022.mcupdater.protocol;
 
 import io.netty.buffer.ByteBuf;
+import me.gb2022.mcupdater.data.ChannelMetadata;
 import me.gb2022.simpnet.packet.DeserializedConstructor;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.util.BufferUtil;
-import me.gb2022.mcupdater.data.ChannelMetadata;
 
 import java.util.HashMap;
 import java.util.Map;

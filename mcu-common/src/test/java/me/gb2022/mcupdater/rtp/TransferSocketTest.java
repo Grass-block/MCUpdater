@@ -1,4 +1,4 @@
-package org.atcgroup.mcupdater.server.v4.rtp;
+package me.gb2022.mcupdater.rtp;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
@@ -10,16 +10,13 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import me.gb2022.mcupdater.rtp.protocol.P70_FTPRangeRequest;
+import me.gb2022.mcupdater.rtp.protocol.P72_FTPPayload;
+import me.gb2022.mcupdater.rtp.protocol.P75_FTPStatusResult;
+import me.gb2022.mcupdater.rtp.protocol.RTPProtocol;
 import me.gb2022.simpnet.channel.NettyChannelInitializer;
 import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.PacketInboundHandler;
-import org.atcgroup.mcupdater.server.v4.rtp.TransferChannelInitializer;
-import org.atcgroup.mcupdater.server.v4.rtp.TransferManager;
-import org.atcgroup.mcupdater.server.v4.rtp.TransferMode;
-import org.atcgroup.mcupdater.server.v4.rtp.protocol.P70_FTPRangeRequest;
-import org.atcgroup.mcupdater.server.v4.rtp.protocol.P72_FTPPayload;
-import org.atcgroup.mcupdater.server.v4.rtp.protocol.P75_FTPStatusResult;
-import org.atcgroup.mcupdater.server.v4.rtp.protocol.RTPProtocol;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -30,7 +27,7 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.atcgroup.mcupdater.server.v4.rtp.TransferTestSupport.*;
+import static me.gb2022.mcupdater.rtp.TransferTestSupport.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TransferSocketTest {

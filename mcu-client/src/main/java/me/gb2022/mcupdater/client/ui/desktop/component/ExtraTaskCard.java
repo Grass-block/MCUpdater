@@ -1,7 +1,7 @@
 package me.gb2022.mcupdater.client.ui.desktop.component;
 
-import org.atcgroup.mcupdater.client.ui.TaskListener;
 import me.gb2022.mcupdater.client.ui.desktop.screen.ProcessScreen;
+import org.atcgroup.mcupdater.client.ui.TaskListener;
 
 import javax.swing.*;
 import java.awt.*;

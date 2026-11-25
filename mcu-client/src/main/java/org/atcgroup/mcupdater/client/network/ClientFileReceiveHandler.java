@@ -1,10 +1,10 @@
 package org.atcgroup.mcupdater.client.network;
 
+import me.gb2022.mcupdater.client.ui.desktop.UI;
+import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import me.gb2022.mcupdater.client.util.ClientFilePath;
 import org.atcgroup.mcupdater.client.MCUpdaterClient;
-import me.gb2022.mcupdater.client.ui.desktop.UI;
 import org.atcgroup.mcupdater.network.handler.FileReceiveHandler;
 import org.atcgroup.mcupdater.network.packet.P70_FTPHeader;
 

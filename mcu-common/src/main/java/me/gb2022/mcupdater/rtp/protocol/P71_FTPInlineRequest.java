@@ -1,8 +1,8 @@
 package me.gb2022.mcupdater.rtp.protocol;
 
 import io.netty.buffer.ByteBuf;
-import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.packet.DeserializedConstructor;
+import me.gb2022.simpnet.packet.Packet;
 import me.gb2022.simpnet.util.BufferUtil;
 
 /** Client has registered this task; the server may now send INLINE or serve P70. */
